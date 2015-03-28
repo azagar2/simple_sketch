@@ -1,11 +1,41 @@
 <!DOCTYPE html>
 <html>
-	<body>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
 		
-		<div id="sketch">
-			<canvas id="mySketch"></canvas>
+	<body>
+		<div class="col-md-12">
+			
+<!-- 			<div class="col-md-1"> -->
+				<div class="btn-group btn-group-lg">
+				<button id="selectButton" type="button" class="btn btn-primary">Select</button>
+				<button id="freehandButton" type="button" class="btn btn-primary">Freehand</button>
+	  			<button id="lineButton" type="button" class="btn btn-primary">Line</button>
+	  			<button id="rectButton" type="button" class="btn btn-primary">Rectangle</button>
+	  			<button id="squareButton" type="button" class="btn btn-primary">Square</button>
+	  			<button id="ellipseButton" type="button" class="btn btn-primary">Ellipse</button>
+	  			<button id="circleButton" type="button" class="btn btn-primary">Circle</button>
+				</div>
 		</div>
+		<div class="col-md-12">
+<!-- 			<div class="col-md-11"> -->
+
+		
+				<div id="sketch">
+					<canvas id="paint" style="border:1px solid #000000;"></canvas>
+				</div>
+				
+		</div>
+			
+		</div>
+
+		<script src="sketch.js"></script>
 		
 	</body>
+	
 </html>
-
