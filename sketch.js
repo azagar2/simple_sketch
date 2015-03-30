@@ -52,6 +52,10 @@ var colour = 'black';
 	$('#circleButton').on('click', function (e) {
     	mode = "circle";
 	});
+    $('#clearButton').on('click', function (e) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // empty the array of shapes?
+    });
 	
 	
 	/* Mouse Capturing Work */
@@ -104,18 +108,18 @@ var colour = 'black';
 		if (mode != 'select') {
 			// Saving all the points in an array
 			ppts.push({x: mouse.x, y: mouse.y});
-			
-			if (false) {
-				if (ppts.length < 3) {
-					var b = ppts[0];
-					tmp_ctx.beginPath();
-					tmp_ctx.arc(b.x, b.y, tmp_ctx.lineWidth / 2, 0, Math.PI * 2, !0);
-					tmp_ctx.fill();
-					tmp_ctx.closePath();
-					
-					return;
-				}
-			}
+			//
+			//if (false) {
+			//	if (ppts.length < 3) {
+			//		var b = ppts[0];
+			//		tmp_ctx.beginPath();
+			//		tmp_ctx.arc(b.x, b.y, tmp_ctx.lineWidth / 2, 0, Math.PI * 2, !0);
+			//		tmp_ctx.fill();
+			//		tmp_ctx.closePath();
+			//
+			//		return;
+			//	}
+			//}
 		}
 		
 		// Tmp canvas is always cleared up before drawing.
@@ -173,16 +177,15 @@ var colour = 'black';
 			ye = y + h,           // y-end
 			xm = x + w / 2,       // x-middle
 			ym = y + h / 2;       // y-middle
-			
-			ctx.beginPath();
-			ctx.moveTo(x, ym);
-			ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-			ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-			ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-			ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-			ctx.stroke();
-			ctx.closePath();
-			//ctx.stroke();
+
+            tmp_ctx.beginPath();
+            tmp_ctx.moveTo(x, ym);
+            tmp_ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+            tmp_ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+            tmp_ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+            tmp_ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+            tmp_ctx.stroke();
+            tmp_ctx.closePath();
 		}
 		
 		else if (mode == 'freehand') {
