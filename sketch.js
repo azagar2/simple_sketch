@@ -1,6 +1,9 @@
 var mode = 'select';
 var colour = 'black';
-
+var isDrawing = false;
+var endOfLine = {x:0, y:0};
+var shapes = [];
+var global_x, global_y, global_radius, global_width, global_height;
 
 // Main stuff 
 (function() {
@@ -26,7 +29,7 @@ var colour = 'black';
 	var mouse = {x: 0, y: 0};
 	var last_mouse = {x: 0, y: 0};
 	var start_mouse = {x:0, y:0};
-	
+
 	// Pencil Points
 	var ppts = [];
 	
@@ -52,6 +55,12 @@ var colour = 'black';
 	$('#circleButton').on('click', function (e) {
     	mode = "circle";
 	});
+    $('#openPolyButton').on('click', function (e) {
+        mode = "open";
+    });
+    $('#closedPolyButton').on('click', function (e) {
+        mode = "closed";
+    });
     $('#clearButton').on('click', function (e) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         // empty the array of shapes?
@@ -71,36 +80,64 @@ var colour = 'black';
 	tmp_ctx.lineCap = 'round';
 	tmp_ctx.strokeStyle = colour;
 	tmp_ctx.fillStyle = colour;
-	
-	
+
 	
 	tmp_canvas.addEventListener('mousedown', function(e) {
-		tmp_canvas.addEventListener('mousemove', onPaint, false);
-		
-		mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-		mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
-		
-		ppts.push({x: mouse.x, y: mouse.y});
-		
-		start_mouse.x = mouse.x;
-		start_mouse.y = mouse.y;
-		
-		onPaint();
+
+
+        if ((mode != 'open') && (mode != 'closed')) {
+            tmp_canvas.addEventListener('mousemove', onPaint, false);
+
+            mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+            mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+
+            ppts.push({x: mouse.x, y: mouse.y});
+
+            start_mouse.x = mouse.x;
+            start_mouse.y = mouse.y;
+
+            onPaint();
+        }
+        else { // open and closed polygons
+
+
+
+        }
+
 	}, false);
 	
 	
 	
 	tmp_canvas.addEventListener('mouseup', function() {
-		tmp_canvas.removeEventListener('mousemove', onPaint, false);
+
+        tmp_canvas.removeEventListener('mousemove', onPaint, false);
+
 		// Writing down to real canvas now
 		ctx.drawImage(tmp_canvas, 0, 0);
 		// Clearing tmp canvas
 		tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
 		// Emptying up Pencil Points
 		ppts = [];
-	}, false);
-	
-	
+
+        if (mode == 'circle') {
+            shapes.push({ type:'circle',x:global_x, y:global_y, rad:global_radius});
+        }
+        else if (mode == 'square') {
+            shapes.push({ type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
+        }
+        else{};
+        console.log(shapes.length);
+
+    }, false);
+
+
+
+    tmp_canvas.addEventListener('dblclick', function(){
+        if (mode == 'closed') {
+            tmp_ctx.closePath();
+        }
+        // closes polygon, should be able to create new object now
+    });
 	
 	
 	var onPaint = function() {
@@ -154,6 +191,16 @@ var colour = 'black';
 		    tmp_ctx.arc(x, y, radius, 0, Math.PI*2, false);
 		    tmp_ctx.stroke();
 		    tmp_ctx.closePath();
+
+            console.log("hi");
+            //for (var i; i < ppts.length; i++) {
+            //    console.log("x = " + ppts[i].x + " y = " + ppts[i].y);
+            //}
+
+            global_x = x;
+            global_y = y;
+            global_radius = radius;
+
 		}
 		
 		else if (mode == 'square') {
@@ -162,6 +209,10 @@ var colour = 'black';
 			var width = Math.abs(mouse.x - start_mouse.x);
 			var height = width;
 			tmp_ctx.strokeRect(x, y, width, height);
+            global_height = height;
+            global_width = width;
+            global_x = x;
+            global_y = y;
 		}
 		
 		else if (mode == 'ellipse') {
@@ -210,10 +261,26 @@ var colour = 'black';
 		
 			tmp_ctx.stroke();
 		}
+
+        else if (mode == 'open') {
+
+            if (!isDrawing) {
+                isDrawing = true;
+                tmp_ctx.beginPath();
+                tmp_ctx.moveTo(start_mouse.x, start_mouse.y);
+                //console.log(start_mouse.x + " " + start_mouse.y);
+                tmp_ctx.lineTo(mouse.x, mouse.y);
+                tmp_ctx.stroke();
+                //tmp_ctx.closePath();
+            }
+            tmp_ctx.moveTo(endOfLine.x, endOfLine.y);
+            tmp_ctx.lineTo(mouse.x, mouse.y);
+            endOfLine.x = mouse.x;
+            endOfLine.y = mouse.y;
+            tmp_ctx.stroke();
+        }
 		
 		else {}
-	
-		
 	};
 	
 }());
