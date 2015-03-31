@@ -6,7 +6,8 @@ var shapes = [];
 var selectedShapes = [];
 var copiedShapes = [];
 var global_x, global_y, global_radius, global_width, global_height;
-var points = [];
+var global_points = [];
+var poly_points = [];
 
 // Main stuff 
 (function() {
@@ -146,106 +147,116 @@ var points = [];
 			}
 		}
 
-		if ((mode != 'open') && (mode != 'closed')) {
-			tmp_canvas.addEventListener('mousemove', onPaint, false);
+        if ((mode != 'open') && (mode != 'closed')) {
+            tmp_canvas.addEventListener('mousemove', onPaint, false);
 
-			mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-			mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+            mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+            mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
 
-			ppts.push({x: mouse.x, y: mouse.y});
+            ppts.push({x: mouse.x, y: mouse.y});
 
-			start_mouse.x = mouse.x;
-			start_mouse.y = mouse.y;
+            start_mouse.x = mouse.x;
+            start_mouse.y = mouse.y;
 
-			onPaint();
-		}
-		else { // open and closed polygons
-			console.log("polygon");
-			if (!isDrawing) {
-				console.log("down new drawing");
-				isDrawing = true;
-				points.push({x: mouse.x, y:mouse.y});
-				endOfLine.x = mouse.x;
-				endOfLine.y = mouse.y;
-				ctx.beginPath();
-				ctx.moveTo(endOfLine.x, endOfLine.y);
-			}
-			else { // already drawing polygon
-				console.log("down already drawing");
-				points.push({x: mouse.x, y:mouse.y});
-				endOfLine.x = mouse.x;
-				endOfLine.y = mouse.y;
-				if (points.length > 1) {
-					var length = points.length;
-					ctx.lineTo(points[length-1].x, points[length-1].y);
-					ctx.stroke();
-					console.log("draw on canvas with points " + points[length-1].x + " and " + points[length-1].y);
-				}
-			}
-		}
+            onPaint();
+        }
+        else { // open and closed polygons
+            console.log("polygon");
+            if (!isDrawing) {
+                console.log("down new drawing");
+                isDrawing = true;
+                poly_points.push({x: mouse.x, y:mouse.y});
+                endOfLine.x = mouse.x;
+                endOfLine.y = mouse.y;
+                ctx.beginPath();
+                ctx.moveTo(endOfLine.x, endOfLine.y);
+            }
+            else { // already drawing polygon
+                console.log("down already drawing");
+                poly_points.push({x: mouse.x, y:mouse.y});
+                endOfLine.x = mouse.x;
+                endOfLine.y = mouse.y;
+                if (poly_points.length > 1) {
+                    var length = poly_points.length;
+                    ctx.lineTo(poly_points[length-1].x, poly_points[length-1].y);
+                    ctx.stroke();
+                    console.log("draw on canvas with poly_points " + poly_points[length-1].x + " and " + poly_points[length-1].y);
+                }
+            }
+        }
 	}, false);
 	
 
 	tmp_canvas.addEventListener('mouseup', function() {
 
-		if ((mode != 'open') && (mode != 'closed')) {
+        if ((mode != 'open') && (mode != 'closed')) {
 
-			tmp_canvas.removeEventListener('mousemove', onPaint, false);
-			// Writing down to real canvas now
-			ctx.drawImage(tmp_canvas, 0, 0);
-			// Clearing tmp canvas
-			tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
-			// Emptying up Pencil Points
-			ppts = [];
+            tmp_canvas.removeEventListener('mousemove', onPaint, false);
+            // Writing down to real canvas now
+            ctx.drawImage(tmp_canvas, 0, 0);
+            // Clearing tmp canvas
+            tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+            // Emptying up Pencil Points
+            ppts = [];
 
-			if (mode == 'circle') {
-				shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius});
-			}
-			else if (mode == 'square') {
-				shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
-			}
-			else if (mode == 'rect') {
-				shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height });
-			}
-			else if (mode == 'ellipse') {
-				shapes.push({type:'ellipse', x:global_x, y:global_y, w:global_width, h:global_height});
-			}
-			else {};
-		}
-		else { // polygon
+            if (mode == 'circle') {
+                shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius});
+            }
+            else if (mode == 'line') {
+                global_points.splice(1, (global_points.length)-2);
+                shapes.push({type:'line', points: global_points});
+            }
+            else if (mode == 'square') {
+                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
+            }
+            else if (mode == 'rect') {
+                shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height });
+            }
+            else if (mode == 'ellipse') {
+                shapes.push({type:'ellipse', x:global_x, y:global_y, w:global_width, h:global_height});
+            }
+            else{};
+            console.log(shapes.length);
+        }
+        else { // polygon
 
-			tmp_canvas.addEventListener('mousemove', onPaint, false);
-			if (isDrawing) {
-				onPaint();
-			}
-		}
-	}, false);
+            tmp_canvas.addEventListener('mousemove', onPaint, false);
+            if (isDrawing) {
+                onPaint();
+            }
+        }
+    }, false);
 
 
-	tmp_canvas.addEventListener('dblclick', function(){
-		if ((mode == 'closed') || (mode == 'open')) {
-			points.push({ x:mouse.x, y:mouse.y});
-			if (mode == 'closed') {
-				ctx.closePath();
-			}
-			ctx.stroke();
-			tmp_canvas.removeEventListener('mousemove', onPaint, false);
+    tmp_canvas.addEventListener('dblclick', function(){
+        if ((mode == 'closed') || (mode == 'open')) {
+            poly_points.push({ x:mouse.x, y:mouse.y});
+            if (mode == 'closed') {
+                ctx.closePath();
+            }
+            ctx.stroke();
+            tmp_canvas.removeEventListener('mousemove', onPaint, false);
 
-			isDrawing = false;
-			// Clearing tmp canvas
-			tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+            isDrawing = false;
+            // Clearing tmp canvas
+            tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
 
-			// Add new polygon to shape array
-			if (mode == 'closed')
-				shapes.push({type:'closed', points: points});
-			else shapes.push({type:'open', points: points});
-		}
-	});
+            // Add new polygon to shape array
+            poly_points.splice(poly_points.length-2, 2);
+            //for (var k = 0; k < poly_points.length; k++) {
+            //    console.log(poly_points[k].x);
+            //}
+            if (mode == 'closed')
+                shapes.push({type:'closed', points: poly_points});
+            else shapes.push({type:'open', points: poly_points});
+            poly_points = [];
+        }
+    });
 	
 	var onPaint = function() {
 		
 		if (mode != 'select') {
-			// Saving all the points in an array
+			// Saving all the poly_points in an array
 			ppts.push({x: mouse.x, y: mouse.y});
 		}
 		
@@ -258,6 +269,9 @@ var points = [];
 			tmp_ctx.lineTo(mouse.x, mouse.y);
 			tmp_ctx.stroke();
 			tmp_ctx.closePath();
+
+            global_points.push({x:start_mouse.x, y:start_mouse.y});
+            global_points.push({x:mouse.x, y:mouse.y});
 		}
 		
 		else if (mode == 'rect') {
@@ -344,14 +358,13 @@ var points = [];
 				tmp_ctx.quadraticCurveTo(ppts[i].x, ppts[i].y, c, d);
 			}
 			
-			// For the last 2 points
+			// For the last 2 poly_points
 			tmp_ctx.quadraticCurveTo(
 				ppts[i].x,
 				ppts[i].y,
 				ppts[i + 1].x,
 				ppts[i + 1].y
 			);
-		
 			tmp_ctx.stroke();
 		}
 
@@ -367,50 +380,65 @@ var points = [];
 		else {}
 	};
 
-	var reDraw = function() {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		for (var i = 0; i < shapes.length; i++) {
-			console.log(shapes[i].type);
+    var reDraw = function() {
 
-			if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
-				ctx.strokeRect(shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h);
-			}
-			else if (shapes[i].type == 'line') {
+        for (var i = 0; i < shapes.length; i++) {
+            console.log(shapes[i].type);
 
-			}
-			else if (shapes[i].type == 'circle') {
-				ctx.beginPath();
-				ctx.arc(shapes[i].x, shapes[i].y, shapes[i].rad, 0, Math.PI*2, false);
-				ctx.stroke();
-				ctx.closePath();
-			}
-			else if (shapes[i].type == 'ellipse') {
-				var x = shapes[i].x;
-				var y = shapes[i].y;
-				var w = shapes[i].w;
-				var h = shapes[i].h;
+            if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
+                ctx.strokeRect(shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h);
+            }
+            else if (shapes[i].type == 'line') {
+                ctx.beginPath();
+                console.log(shapes[i].points[0].x + " " + shapes[i].points[0].y);
+                console.log(shapes[i].points[1].x + " " + shapes[i].points[1].y);
+                ctx.moveTo(shapes[i].points[0].x, shapes[i].points[0].y);
+                ctx.lineTo(shapes[i].points[1].x, shapes[i].points[1].y);
+                ctx.stroke();
+            }
+            else if (shapes[i].type == 'circle') {
+                ctx.beginPath();
+                ctx.arc(shapes[i].x, shapes[i].y, shapes[i].rad, 0, Math.PI*2, false);
+                ctx.stroke();
+                ctx.closePath();
+            }
+            else if (shapes[i].type == 'ellipse') {
+                var x = shapes[i].x;
+                var y = shapes[i].y;
+                var w = shapes[i].w;
+                var h = shapes[i].h;
 
-				var kappa = .5522848,
-					ox = (w / 2) * kappa, // control point offset horizontal
-					oy = (h / 2) * kappa, // control point offset vertical
-					xe = x + w,           // x-end
-					ye = y + h,           // y-end
-					xm = x + w / 2,       // x-middle
-					ym = y + h / 2;       // y-middle
+                var kappa = .5522848,
+                    ox = (w / 2) * kappa, // control point offset horizontal
+                    oy = (h / 2) * kappa, // control point offset vertical
+                    xe = x + w,           // x-end
+                    ye = y + h,           // y-end
+                    xm = x + w / 2,       // x-middle
+                    ym = y + h / 2;       // y-middle
 
-				tmp_ctx.beginPath();
-				tmp_ctx.moveTo(x, ym);
-				tmp_ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-				tmp_ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-				tmp_ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-				tmp_ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-				tmp_ctx.stroke();
-				tmp_ctx.closePath();
-			}
-
-			else{};
-		}
-	}
+                tmp_ctx.beginPath();
+                tmp_ctx.moveTo(x, ym);
+                tmp_ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+                tmp_ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+                tmp_ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+                tmp_ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+                tmp_ctx.stroke();
+                tmp_ctx.closePath();
+            }
+            else if (shapes[i].type == 'open' || shapes[i].type == 'closed') {
+                ctx.beginPath();
+                ctx.moveTo(shapes[i].points[0].x, shapes[i].points[0].y);
+                for (var j = 1; j < shapes[i].points.length; j++) {
+                    ctx.lineTo(shapes[i].points[j].x, shapes[i].points[j].y);
+                }
+                if (shapes[i].type == 'closed') {
+                    ctx.closePath();
+                }
+                ctx.stroke();
+            }
+            else{};
+        }
+    }
 	
 }());
 
