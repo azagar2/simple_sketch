@@ -3,6 +3,7 @@ var colour = 'black';
 var isDrawing = false;
 var endOfLine = {x:0, y:0};
 var shapes = [];
+var selectedShapes = [];
 var global_x, global_y, global_radius, global_width, global_height;
 
 // Main stuff 
@@ -84,6 +85,18 @@ var global_x, global_y, global_radius, global_width, global_height;
 	
 	tmp_canvas.addEventListener('mousedown', function(e) {
 
+		if (mode == "select") {
+			for (var i = 0; i<shapes.length; i++) {
+				if (shapes[i].type == "square") {
+					if (mouse.x > shapes[i].x && mouse.x < (shapes[i].x + shapes[i].w)
+						&& mouse.y > shapes[i].y && mouse.y < (shapes[i].y + shapes[i].h)) {
+						console.log("collision");
+						selectedShapes.push(shapes[i]);
+					}
+				}
+			}
+		}
+
 
         if ((mode != 'open') && (mode != 'closed')) {
             tmp_canvas.addEventListener('mousemove', onPaint, false);
@@ -126,8 +139,6 @@ var global_x, global_y, global_radius, global_width, global_height;
             shapes.push({ type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
         }
         else{};
-        console.log(shapes.length);
-
     }, false);
 
 
