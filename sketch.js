@@ -156,8 +156,7 @@ var poly_points = [];
 					selectedShapes[i].x = mouse.x;
 					selectedShapes[i].y = mouse.y;
 				}
-				unselect();
-				reDraw();
+				unselect();				
 			} else {
 				// collision detection
 				for (var i = 0; i<shapes.length; i++) {
@@ -170,7 +169,6 @@ var poly_points = [];
 						}
 					}
 				}
-				reDraw();
 			}
 		}
 
@@ -411,6 +409,8 @@ var poly_points = [];
 		}
 		
 		else {}
+
+		reDraw();
 	};
 
     var reDraw = function() {
