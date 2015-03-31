@@ -4,6 +4,7 @@ var isDrawing = false;
 var endOfLine = {x:0, y:0};
 var shapes = [];
 var selectedShapes = [];
+var copiedShapes = [];
 var global_x, global_y, global_radius, global_width, global_height;
 var global_points = [];
 var poly_points = [];
@@ -152,6 +153,26 @@ var poly_points = [];
 		selectedShapes = [];
 		reDraw();
 	});
+	$('#copyButton').on('click', function (e) {
+		if (selectedShapes.length > 0) {
+			copiedShapes = [];
+			for (var i = 0; i<selectedShapes.length; i++) {
+				copiedShapes.push(selectedShapes[i]);
+			}			
+			console.log(copiedShapes);
+		}
+	});
+	$('#pasteButton').on('click', function (e) {
+		selectedShapes = [];
+		var offset = 10;
+		for (var i = 0; i<copiedShapes.length; i++) {
+			if (copiedShapes[i].type == "square") {
+				shapes.push({type:'square', x:offset, y:10, w:copiedShapes[i].w, h:copiedShapes[i].h, selected:false});
+			}
+			offset += 25;
+		}	
+		reDraw();
+	});
 
 	
 	/* Mouse Capturing Work */
@@ -266,7 +287,7 @@ var poly_points = [];
                 shapes.push({type:'line', points: global_points});
             }
             else if (mode == 'square') {
-                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
+                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height, selected:false});
             }
             else if (mode == 'rect') {
                 shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height });
@@ -438,7 +459,7 @@ var poly_points = [];
 	};
 
     var reDraw = function() {
-
+    	ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (var i = 0; i < shapes.length; i++) {
             console.log(shapes[i].type);
 
