@@ -13,7 +13,81 @@ var poly_points = [];
 	
 	var canvas = document.querySelector('#paint');
 	var ctx = canvas.getContext('2d');
-	
+
+    // colour picker
+
+    var colour_canvas  = document.querySelector('#colour');
+    //app.colorctx = app.$colors.getContext('2d');
+    var colourctx = colour_canvas.getContext('2d');
+
+
+// Build Color palette
+    var buildColorPalette = function() {
+        console.log("in build colour palette");
+        var gradient = colourctx.createLinearGradient(0, 0, colour_canvas.width(), 0);
+
+        // Create color gradient
+        gradient.addColorStop(0,    "rgb(255,   0,   0)");
+        gradient.addColorStop(0.15, "rgb(255,   0, 255)");
+        gradient.addColorStop(0.33, "rgb(0,     0, 255)");
+        gradient.addColorStop(0.49, "rgb(0,   255, 255)");
+        gradient.addColorStop(0.67, "rgb(0,   255,   0)");
+        gradient.addColorStop(0.84, "rgb(255, 255,   0)");
+        gradient.addColorStop(1,    "rgb(255,   0,   0)");
+
+        // Apply gradient to canvas
+        colourctx.fillStyle = gradient;
+        colourctx.fillRect(0, 0, colourctx.canvas.width, colourctx.canvas.height);
+
+        // Create semi transparent gradient (white -> trans. -> black)
+        gradient = colourctx.createLinearGradient(0, 0, 0, colour_canvas.height());
+        gradient.addColorStop(0,   "rgba(255, 255, 255, 1)");
+        gradient.addColorStop(0.5, "rgba(255, 255, 255, 0)");
+        gradient.addColorStop(0.5, "rgba(0,     0,   0, 0)");
+        gradient.addColorStop(1,   "rgba(0,     0,   0, 1)");
+
+        // Apply gradient to canvas
+        colourctx.fillStyle = gradient;
+        colourctx.fillRect(0, 0, colourctx.canvas.width, colourctx.canvas.height);
+
+        /* Mouse Capturing Work */
+        colour_canvas.addEventListener('mousemove', function(e) {
+            //mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+            //mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+            colourctx.colorEventX = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+            colourctx.colorEventY = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+            //colourctx.colorEventX = e.pageX - ms.$colors.offset().left;
+            //colourctx.colorEventY = e.pageY - ms.$colors.offset().top;
+        }, false);
+
+        colour_canvas.addEventListener('mousedown', function(e) {
+
+            colour_canvas.addEventListener('mousemove', buildColorPalette, false);
+
+            // Get the color at the current mouse coordinates
+            colourctx.colorTimer = setInterval(getColor(), 50);
+
+            buildColorPalette();
+        });
+
+        colour_canvas.addEventListener('mouseup', function(e) {
+            clearInterval(colourctx.colorTimer);
+            colour_canvas.removeEventListener('mousemove', buildColorPalette, false);
+        });
+    };
+
+    var getColor = function(e) {
+        var newColor;
+        var imageData = colourctx.getImageData(colourctx.colorEventX, colourctx.colorEventY, 1, 1);
+        app.selectedColor = 'rgb(' + imageData.data[4] + ', ' + imageData.data[5] + ', ' + imageData.data[6] + ')';
+    };
+
+
+
+
+
+
+
 	var sketch = document.querySelector('#sketch');
 	var sketch_style = getComputedStyle(sketch);
 	canvas.width = parseInt(sketch_style.getPropertyValue('width'));
@@ -177,9 +251,13 @@ var poly_points = [];
             ctx.drawImage(tmp_canvas, 0, 0);
             // Clearing tmp canvas
             tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
-            // Emptying up Pencil Points
-            ppts = [];
 
+
+            if (mode == 'freehand') {
+                shapes.push({type:'freehand', points:ppts});
+                // Emptying up Pencil Points
+                ppts = [];
+            }
             if (mode == 'circle') {
                 shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius});
             }
@@ -224,9 +302,6 @@ var poly_points = [];
 
             // Add new polygon to shape array
             poly_points.splice(poly_points.length-2, 2);
-            //for (var k = 0; k < poly_points.length; k++) {
-            //    console.log(poly_points[k].x);
-            //}
             if (mode == 'closed')
                 shapes.push({type:'closed', points: poly_points});
             else shapes.push({type:'open', points: poly_points});
@@ -333,19 +408,20 @@ var poly_points = [];
 			tmp_ctx.moveTo(ppts[0].x, ppts[0].y);
 			
 			for (var i = 1; i < ppts.length - 2; i++) {
-				var c = (ppts[i].x + ppts[i + 1].x) / 2;
-				var d = (ppts[i].y + ppts[i + 1].y) / 2;
-				
-				tmp_ctx.quadraticCurveTo(ppts[i].x, ppts[i].y, c, d);
-			}
-			
-			// For the last 2 poly_points
-			tmp_ctx.quadraticCurveTo(
-				ppts[i].x,
-				ppts[i].y,
-				ppts[i + 1].x,
-				ppts[i + 1].y
-			);
+                var c = (ppts[i].x + ppts[i + 1].x) / 2;
+                var d = (ppts[i].y + ppts[i + 1].y) / 2;
+
+                tmp_ctx.quadraticCurveTo(ppts[i].x, ppts[i].y, c, d);
+
+
+                // For the last 2 poly_points
+                tmp_ctx.quadraticCurveTo(
+                    ppts[i].x,
+                    ppts[i].y,
+                    ppts[i + 1].x,
+                    ppts[i + 1].y
+                );
+            }
 			tmp_ctx.stroke();
 		}
 
@@ -414,6 +490,25 @@ var poly_points = [];
                 }
                 if (shapes[i].type == 'closed') {
                     ctx.closePath();
+                }
+                ctx.stroke();
+            }
+            else if (shapes[i].type == 'freehand') {
+                ctx.beginPath();
+                ctx.moveTo(shapes[i].points[0].x, shapes[i].points[0].y);
+
+                for (var j = 1; j < shapes[i].points.length - 2; j++) {
+                    var c = (shapes[i].points[j].x + shapes[i].points[j + 1].x) / 2;
+                    var d = (shapes[i].points[j].y + shapes[i].points[j + 1].y) / 2;
+                    ctx.quadraticCurveTo(shapes[i].points[j].x, shapes[i].points[j].y, c, d);
+
+                    // For the last 2 poly_points
+                    ctx.quadraticCurveTo(
+                        shapes[i].points[j].x,
+                        shapes[i].points[j].y,
+                        shapes[i].points[j + 1].x,
+                        shapes[i].points[j + 1].y
+                    );
                 }
                 ctx.stroke();
             }

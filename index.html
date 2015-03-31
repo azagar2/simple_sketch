@@ -16,14 +16,14 @@
 <!-- 			<div class="col-md-1"> -->
 				<div class="btn-group btn-group-lg">
 				<button id="selectButton" type="button" class="btn btn-primary">Select</button>
-				<button id="freehandButton" type="button" class="btn btn-primary">Freehand</button>
-	  			<button id="lineButton" type="button" class="btn btn-primary">Line</button>
-	  			<button id="rectButton" type="button" class="btn btn-primary">Rectangle</button>
-	  			<button id="squareButton" type="button" class="btn btn-primary">Square</button>
-	  			<button id="ellipseButton" type="button" class="btn btn-primary">Ellipse</button>
-	  			<button id="circleButton" type="button" class="btn btn-primary">Circle</button>
-                <button id="openPolyButton" type="button" class="btn btn-primary">Open Polygon</button>
-                <button id="closedPolyButton" type="button" class="btn btn-primary">Closed Polygon</button>
+				<button id="freehandButton" type="button" class="btn btn-primary"><img src="images/freehand.jpg"></button>
+	  			<button id="lineButton" type="button" class="btn btn-primary"><img src="images/line.jpg"></button>
+	  			<button id="rectButton" type="button" class="btn btn-primary"><img src="images/rectangle.jpg"></button>
+	  			<button id="squareButton" type="button" class="btn btn-primary"><img src="images/square.jpg"></button>
+	  			<button id="ellipseButton" type="button" class="btn btn-primary"><img src="images/ellipse.jpg"></button>
+	  			<button id="circleButton" type="button" class="btn btn-primary"><img src="images/circle.jpg"></button>
+                <button id="openPolyButton" type="button" class="btn btn-primary"><img src="images/openpolygon.jpg"></button>
+                <button id="closedPolyButton" type="button" class="btn btn-primary"><img src="images/closedpolygon.jpg"></button>
                 <button id="clearButton" type="button" class="btn btn-primary">Clear</button>
                 <button id="deleteButton" type="button" class="btn btn-primary">Delete</button>
 				</div>
@@ -37,8 +37,17 @@
 				</div>
 				
 		</div>
-			
-		</div>
+
+        <div class="col-md-12">
+            <!-- 			<div class="col-md-11"> -->
+
+
+            <div id="colour_palette">
+                <canvas class="color-palette" id="colour" width="284" height="155"></canvas>
+                <!--<canvas id="colour" style="border:1px solid #000000;"></canvas>-->
+            </div>
+
+        </div>
 
 		<script src="sketch.js"></script>
 		
