@@ -96,22 +96,35 @@ var poly_points = [];
 		var offset = 10;
 		for (var i = 0; i<copiedShapes.length; i++) {
 			if (copiedShapes[i].type == "square") {
-				shapes.push({type:'square', x:offset, y:10, w:copiedShapes[i].w, h:copiedShapes[i].h, selected:true});
+				shapes.push({type:'square', x:offset, y:10, w:copiedShapes[i].w, h:copiedShapes[i].h, colour: copiedShapes[i].colour, selected:true});
 				selectedShapes.push(shapes[shapes.length-1]);
 			}
 			offset += 25;
 		}	
 		reDraw();
 	});
+    $('#black').on('click', function (e) {
+        tmp_ctx.strokeStyle = 'black';
+        ctx.strokeStyle = 'black';
+        colour = 'black';
+    });
+    $('#red').on('click', function (e) {
+        tmp_ctx.strokeStyle = 'red';
+        ctx.strokeStyle = 'red';
+        colour = 'red';
+    });
     $('#green').on('click', function (e) {
-        //change outline colour
-        console.log("change colour");
-        //colour = 'green';
         tmp_ctx.strokeStyle = 'green';
         ctx.strokeStyle = 'green';
+        colour = 'green';
+    });
+    $('#blue').on('click', function (e) {
+        tmp_ctx.strokeStyle = 'blue';
+        ctx.strokeStyle = 'blue';
+        colour = 'blue';
     });
 
-	
+
 	/* Mouse Capturing Work */
 	tmp_canvas.addEventListener('mousemove', function(e) {
 		mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
@@ -213,25 +226,25 @@ var poly_points = [];
 
 
             if (mode == 'freehand') {
-                shapes.push({type:'freehand', points:ppts});
+                shapes.push({type:'freehand', points:ppts, colour: colour});
                 // Emptying up Pencil Points
                 ppts = [];
             }
             if (mode == 'circle') {
-                shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius});
+                shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius, colour: colour});
             }
             else if (mode == 'line') {
                 global_points.splice(1, (global_points.length)-2);
-                shapes.push({type:'line', points: global_points});
+                shapes.push({type:'line', points: global_points, colour: colour});
             }
             else if (mode == 'square') {
-                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height, selected:false});
+                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour, selected:false});
             }
             else if (mode == 'rect') {
-                shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height });
+                shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour });
             }
             else if (mode == 'ellipse') {
-                shapes.push({type:'ellipse', x:global_x, y:global_y, w:global_width, h:global_height});
+                shapes.push({type:'ellipse', x:global_x, y:global_y, w:global_width, h:global_height, colour: colour});
             }
             else{};
             console.log(shapes.length);
@@ -262,8 +275,8 @@ var poly_points = [];
             // Add new polygon to shape array
             poly_points.splice(poly_points.length-2, 2);
             if (mode == 'closed')
-                shapes.push({type:'closed', points: poly_points});
-            else shapes.push({type:'open', points: poly_points});
+                shapes.push({type:'closed', points: poly_points,colour: colour});
+            else shapes.push({type:'open', points: poly_points, colour: colour});
             poly_points = [];
         }
     });
@@ -398,14 +411,16 @@ var poly_points = [];
 
     var reDraw = function() {
     	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         for (var i = 0; i < shapes.length; i++) {
+            ctx.strokeStyle = shapes[i].colour;
             console.log(shapes[i].type);
 
             if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
             	if (shapes[i].selected) {
-            		ctx.strokeStyle = 'red';
+            		ctx.strokeStyle = 'yellow';
             	} else {
-            		ctx.strokeStyle = 'black';
+            		ctx.strokeStyle = shapes[i].colour; // CHANGE
             	}
                 ctx.strokeRect(shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h);
             }
