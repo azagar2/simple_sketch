@@ -19,3 +19,24 @@ body {
 	bottom: 0; top: 0;
 	cursor: crosshair;
 }
+
+.btn-black {
+    background: black;
+    border-color: black;
+    color: black;
+}
+.btn-red {
+    background: red;
+    border-color: red;
+    color:red;
+}
+.btn-green {
+    background: green;
+    border-color: green;
+    color: green;
+}
+.btn-blue {
+    background: blue;
+    border-color: blue;
+    color: blue;
+}
