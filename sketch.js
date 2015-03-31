@@ -64,9 +64,10 @@ var points = [];
     });
     $('#clearButton').on('click', function (e) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        reDraw();
         shapes = [];
     });
-	
+
 	
 	/* Mouse Capturing Work */
 	tmp_canvas.addEventListener('mousemove', function(e) {
@@ -145,10 +146,16 @@ var points = [];
             ppts = [];
 
             if (mode == 'circle') {
-                shapes.push({ type:'circle',x:global_x, y:global_y, rad:global_radius});
+                shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius});
             }
             else if (mode == 'square') {
-                shapes.push({ type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
+                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
+            }
+            else if (mode == 'rect') {
+                shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height });
+            }
+            else if (mode == 'ellipse') {
+                shapes.push({type:'ellipse', x:global_x, y:global_y, w:global_width, h:global_height});
             }
             else{};
             console.log(shapes.length);
@@ -165,18 +172,23 @@ var points = [];
 
 
     tmp_canvas.addEventListener('dblclick', function(){
-        points.push({ x:mouse.x, y:mouse.y});
-        console.log("double click");
         if ((mode == 'closed') || (mode == 'open')) {
+            points.push({ x:mouse.x, y:mouse.y});
             if (mode == 'closed') {
                 ctx.closePath();
             }
             ctx.stroke();
             tmp_canvas.removeEventListener('mousemove', onPaint, false);
-            // clear temp canvas
+
             isDrawing = false;
+            // Clearing tmp canvas
+            tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+
+            // Add new polygon to shape array
+            if (mode == 'closed')
+                shapes.push({type:'closed', points: points});
+            else shapes.push({type:'open', points: points});
         }
-        // closes polygon, should be able to create new object now
     });
 	
 	var onPaint = function() {
@@ -184,18 +196,6 @@ var points = [];
 		if (mode != 'select') {
 			// Saving all the points in an array
 			ppts.push({x: mouse.x, y: mouse.y});
-			//
-			//if (false) {
-			//	if (ppts.length < 3) {
-			//		var b = ppts[0];
-			//		tmp_ctx.beginPath();
-			//		tmp_ctx.arc(b.x, b.y, tmp_ctx.lineWidth / 2, 0, Math.PI * 2, !0);
-			//		tmp_ctx.fill();
-			//		tmp_ctx.closePath();
-			//
-			//		return;
-			//	}
-			//}
 		}
 		
 		// Tmp canvas is always cleared up before drawing.
@@ -215,6 +215,10 @@ var points = [];
 			var width = Math.abs(mouse.x - start_mouse.x);
 			var height = Math.abs(mouse.y - start_mouse.y);
 			tmp_ctx.strokeRect(x, y, width, height);
+            global_height = height;
+            global_width = width;
+            global_x = x;
+            global_y = y;
 		}
 		
 		else if (mode == 'circle') {
@@ -270,6 +274,11 @@ var points = [];
             tmp_ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
             tmp_ctx.stroke();
             tmp_ctx.closePath();
+
+            global_x = x;
+            global_y = y;
+            global_width = w;
+            global_height = h;
 		}
 		
 		else if (mode == 'freehand') {
@@ -306,6 +315,49 @@ var points = [];
 		
 		else {}
 	};
+
+    var reDraw = function() {
+
+        for (var i = 0; i < shapes.length; i++) {
+            console.log(shapes[i].type);
+
+            if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
+                ctx.strokeRect(shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h);
+            }
+            else if (shapes[i].type == 'line')
+            else if (shapes[i].type == 'circle') {
+                ctx.beginPath();
+                ctx.arc(shapes[i].x, shapes[i].y, shapes[i].rad, 0, Math.PI*2, false);
+                ctx.stroke();
+                ctx.closePath();
+            }
+            else if (shapes[i].type == 'ellipse') {
+                var x = shapes[i].x;
+                var y = shapes[i].y;
+                var w = shapes[i].w;
+                var h = shapes[i].h;
+
+                var kappa = .5522848,
+                    ox = (w / 2) * kappa, // control point offset horizontal
+                    oy = (h / 2) * kappa, // control point offset vertical
+                    xe = x + w,           // x-end
+                    ye = y + h,           // y-end
+                    xm = x + w / 2,       // x-middle
+                    ym = y + h / 2;       // y-middle
+
+                tmp_ctx.beginPath();
+                tmp_ctx.moveTo(x, ym);
+                tmp_ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+                tmp_ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+                tmp_ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+                tmp_ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+                tmp_ctx.stroke();
+                tmp_ctx.closePath();
+            }
+
+            else{};
+        }
+    }
 	
 }());
 
