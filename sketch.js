@@ -180,7 +180,11 @@ var poly_points = [];
             mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
             mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
 
-            ppts.push({x: mouse.x, y: mouse.y});
+            if (mode == 'freehand') {
+                ppts = [];
+                ppts.push({x: mouse.x, y: mouse.y});
+                console.log("ppts add first point");
+            }
 
             start_mouse.x = mouse.x;
             start_mouse.y = mouse.y;
@@ -229,6 +233,7 @@ var poly_points = [];
                 shapes.push({type:'freehand', points:ppts, colour: colour});
                 // Emptying up Pencil Points
                 ppts = [];
+                console.log("clear ppts");
             }
             if (mode == 'circle') {
                 shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius, colour: colour});
@@ -375,7 +380,7 @@ var poly_points = [];
 		}
 		
 		else if (mode == 'freehand') {
-			
+
 			tmp_ctx.beginPath();
 			tmp_ctx.moveTo(ppts[0].x, ppts[0].y);
 			
@@ -384,7 +389,6 @@ var poly_points = [];
                 var d = (ppts[i].y + ppts[i + 1].y) / 2;
 
                 tmp_ctx.quadraticCurveTo(ppts[i].x, ppts[i].y, c, d);
-
 
                 // For the last 2 poly_points
                 tmp_ctx.quadraticCurveTo(
