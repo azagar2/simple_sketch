@@ -291,6 +291,8 @@ var poly_points = [];
 		if (mode != 'select') {
 			// Saving all the poly_points in an array
 			ppts.push({x: mouse.x, y: mouse.y});
+		} else {
+			reDraw();
 		}
 		
 		// Tmp canvas is always cleared up before drawing.
@@ -411,8 +413,6 @@ var poly_points = [];
 		}
 		
 		else {}
-
-		reDraw();
 	};
 
     var reDraw = function() {
