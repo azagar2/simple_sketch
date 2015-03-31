@@ -5,6 +5,7 @@ var endOfLine = {x:0, y:0};
 var shapes = [];
 var selectedShapes = [];
 var global_x, global_y, global_radius, global_width, global_height;
+var points = [];
 
 // Main stuff 
 (function() {
@@ -64,7 +65,7 @@ var global_x, global_y, global_radius, global_width, global_height;
     });
     $('#clearButton').on('click', function (e) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // empty the array of shapes?
+        shapes = [];
     });
 	
 	
@@ -82,9 +83,17 @@ var global_x, global_y, global_radius, global_width, global_height;
 	tmp_ctx.strokeStyle = colour;
 	tmp_ctx.fillStyle = colour;
 
+    /* Drawing on Paint App */
+    ctx.lineWidth = 5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = colour;
+    ctx.fillStyle = colour;
+
 	
 	tmp_canvas.addEventListener('mousedown', function(e) {
 
+		// collision detection
 		if (mode == "select") {
 			for (var i = 0; i<shapes.length; i++) {
 				if (shapes[i].type == "square") {
@@ -96,7 +105,6 @@ var global_x, global_y, global_radius, global_width, global_height;
 				}
 			}
 		}
-
 
         if ((mode != 'open') && (mode != 'closed')) {
             tmp_canvas.addEventListener('mousemove', onPaint, false);
@@ -112,44 +120,78 @@ var global_x, global_y, global_radius, global_width, global_height;
             onPaint();
         }
         else { // open and closed polygons
-
-
-
+            console.log("polygon");
+            if (!isDrawing) {
+                console.log("down new drawing");
+                isDrawing = true;
+                points.push({x: mouse.x, y:mouse.y});
+                endOfLine.x = mouse.x;
+                endOfLine.y = mouse.y;
+                ctx.beginPath();
+                ctx.moveTo(endOfLine.x, endOfLine.y);
+            }
+            else { // already drawing polygon
+                console.log("down already drawing");
+                points.push({x: mouse.x, y:mouse.y});
+                endOfLine.x = mouse.x;
+                endOfLine.y = mouse.y;
+                if (points.length > 1) {
+                    var length = points.length;
+                    ctx.lineTo(points[length-1].x, points[length-1].y);
+                    ctx.stroke();
+                    console.log("draw on canvas with points " + points[length-1].x + " and " + points[length-1].y);
+                }
+            }
         }
-
 	}, false);
 	
-	
-	
+
 	tmp_canvas.addEventListener('mouseup', function() {
 
-        tmp_canvas.removeEventListener('mousemove', onPaint, false);
+        if ((mode != 'open') && (mode != 'closed')) {
 
-		// Writing down to real canvas now
-		ctx.drawImage(tmp_canvas, 0, 0);
-		// Clearing tmp canvas
-		tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
-		// Emptying up Pencil Points
-		ppts = [];
+            tmp_canvas.removeEventListener('mousemove', onPaint, false);
+            // Writing down to real canvas now
+            ctx.drawImage(tmp_canvas, 0, 0);
+            // Clearing tmp canvas
+            tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+            // Emptying up Pencil Points
+            ppts = [];
 
-        if (mode == 'circle') {
-            shapes.push({ type:'circle',x:global_x, y:global_y, rad:global_radius});
+            if (mode == 'circle') {
+                shapes.push({ type:'circle',x:global_x, y:global_y, rad:global_radius});
+            }
+            else if (mode == 'square') {
+                shapes.push({ type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
+            }
+            else{};
+            console.log(shapes.length);
         }
-        else if (mode == 'square') {
-            shapes.push({ type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
+        else { // polygon
+
+            tmp_canvas.addEventListener('mousemove', onPaint, false);
+            if (isDrawing) {
+                onPaint();
+            }
         }
         else{};
     }, false);
 
 
-
     tmp_canvas.addEventListener('dblclick', function(){
-        if (mode == 'closed') {
-            tmp_ctx.closePath();
+        points.push({ x:mouse.x, y:mouse.y});
+        console.log("double click");
+        if ((mode == 'closed') || (mode == 'open')) {
+            if (mode == 'closed') {
+                ctx.closePath();
+            }
+            ctx.stroke();
+            tmp_canvas.removeEventListener('mousemove', onPaint, false);
+            // clear temp canvas
+            isDrawing = false;
         }
         // closes polygon, should be able to create new object now
     });
-	
 	
 	var onPaint = function() {
 		
@@ -203,15 +245,9 @@ var global_x, global_y, global_radius, global_width, global_height;
 		    tmp_ctx.stroke();
 		    tmp_ctx.closePath();
 
-            console.log("hi");
-            //for (var i; i < ppts.length; i++) {
-            //    console.log("x = " + ppts[i].x + " y = " + ppts[i].y);
-            //}
-
             global_x = x;
             global_y = y;
             global_radius = radius;
-
 		}
 		
 		else if (mode == 'square') {
@@ -273,22 +309,13 @@ var global_x, global_y, global_radius, global_width, global_height;
 			tmp_ctx.stroke();
 		}
 
-        else if (mode == 'open') {
+        else if ((mode == 'open') || (mode == 'closed')) {
 
-            if (!isDrawing) {
-                isDrawing = true;
-                tmp_ctx.beginPath();
-                tmp_ctx.moveTo(start_mouse.x, start_mouse.y);
-                //console.log(start_mouse.x + " " + start_mouse.y);
-                tmp_ctx.lineTo(mouse.x, mouse.y);
-                tmp_ctx.stroke();
-                //tmp_ctx.closePath();
-            }
+            tmp_ctx.beginPath();
             tmp_ctx.moveTo(endOfLine.x, endOfLine.y);
             tmp_ctx.lineTo(mouse.x, mouse.y);
-            endOfLine.x = mouse.x;
-            endOfLine.y = mouse.y;
             tmp_ctx.stroke();
+            tmp_ctx.closePath();
         }
 		
 		else {}
