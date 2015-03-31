@@ -92,7 +92,9 @@ var poly_points = [];
 		selectedShapes = [];
 		var offset = 10;
 		for (var i = 0; i<copiedShapes.length; i++) {
-			shapes.push({type:'square', x:offset, y:10, w:copiedShapes[i].w, h:copiedShapes[i].h});
+			if (copiedShapes[i].type == "square") {
+				shapes.push({type:'square', x:offset, y:10, w:copiedShapes[i].w, h:copiedShapes[i].h, selected:false});
+			}
 			offset += 25;
 		}	
 		reDraw();
@@ -207,7 +209,7 @@ var poly_points = [];
                 shapes.push({type:'line', points: global_points});
             }
             else if (mode == 'square') {
-                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
+                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height, selected:false});
             }
             else if (mode == 'rect') {
                 shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height });
@@ -381,7 +383,7 @@ var poly_points = [];
 	};
 
     var reDraw = function() {
-
+    	ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (var i = 0; i < shapes.length; i++) {
             console.log(shapes[i].type);
 
