@@ -120,6 +120,8 @@ var poly_points = [];
 	
 	$('#selectButton').on('click', function (e) {
 		mode = "select";
+		unselect();
+		reDraw();
 	});
 	$('#freehandButton').on('click', function (e) {
 		mode = "freehand";
@@ -147,6 +149,7 @@ var poly_points = [];
 	});
 	$('#clearButton').on('click', function (e) {
 		shapes = [];
+		selectedShapes = [];
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 	});
 	$('#deleteButton').on('click', function (e) {
@@ -169,11 +172,12 @@ var poly_points = [];
 		}
 	});
 	$('#pasteButton').on('click', function (e) {
-		selectedShapes = [];
+		unselect();
 		var offset = 10;
 		for (var i = 0; i<copiedShapes.length; i++) {
 			if (copiedShapes[i].type == "square") {
-				shapes.push({type:'square', x:offset, y:10, w:copiedShapes[i].w, h:copiedShapes[i].h, selected:false});
+				shapes.push({type:'square', x:offset, y:10, w:copiedShapes[i].w, h:copiedShapes[i].h, selected:true});
+				selectedShapes.push(shapes[shapes.length-1]);
 			}
 			offset += 25;
 		}	
@@ -212,8 +216,8 @@ var poly_points = [];
 					selectedShapes[i].x = mouse.x;
 					selectedShapes[i].y = mouse.y;
 				}
+				unselect();
 				reDraw();
-				selectedShapes = [];
 			} else {
 				// collision detection
 				for (var i = 0; i<shapes.length; i++) {
@@ -221,10 +225,12 @@ var poly_points = [];
 						if (mouse.x > shapes[i].x && mouse.x < (shapes[i].x + shapes[i].w)
 							&& mouse.y > shapes[i].y && mouse.y < (shapes[i].y + shapes[i].h)) {
 							console.log("collision");
+							shapes[i].selected = true;
 							selectedShapes.push(shapes[i]);
 						}
 					}
 				}
+				reDraw();
 			}
 		}
 
@@ -469,6 +475,11 @@ var poly_points = [];
             console.log(shapes[i].type);
 
             if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
+            	if (shapes[i].selected) {
+            		ctx.strokeStyle = 'red';
+            	} else {
+            		ctx.strokeStyle = 'black';
+            	}
                 ctx.strokeRect(shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h);
             }
             else if (shapes[i].type == 'line') {
@@ -539,7 +550,14 @@ var poly_points = [];
                 ctx.stroke();
             }
             else{};
-        }
+        }   
+    }
+
+    var unselect = function() {
+		for (var i = 0; i<selectedShapes.length;i++) {
+			selectedShapes[i].selected = false;
+		}
+		selectedShapes = [];
     }
 	
 }());
