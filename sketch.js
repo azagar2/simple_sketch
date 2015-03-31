@@ -12,86 +12,6 @@ var poly_points = [];
 // Main stuff 
 (function() {
 
-    // colour picker
-    var colour_canvas  = document.querySelector('#colour');
-    //app.colorctx = app.$colors.getContext('2d');
-    var colourctx = colour_canvas.getContext('2d');
-
-    var colour_palette = document.querySelector('#colour_palette');
-    var palette_style = getComputedStyle(colour_palette);
-    //colour_canvas.width = parseInt(palette_style.getPropertyValue('width'));
-    //colour_canvas.height = parseInt(palette_style.getPropertyValue('height'));
-
-    colour_palette.appendChild(colour_canvas);
-
-    /* Mouse Capturing Work */
-    colour_canvas.addEventListener('mousemove', function(e) {
-        //mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-        //mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
-        colourctx.colorEventX = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-        colourctx.colorEventY = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
-        //colourctx.colorEventX = e.pageX - ms.$colors.offset().left;
-        //colourctx.colorEventY = e.pageY - ms.$colors.offset().top;
-    }, false);
-
-    colour_canvas.addEventListener('mousedown', function(e) {
-
-        colour_canvas.addEventListener('mousemove', buildColorPalette, false);
-
-        // Get the color at the current mouse coordinates
-        colourctx.colorTimer = setInterval(getColor(), 50);
-
-        buildColorPalette();
-    });
-
-    colour_canvas.addEventListener('mouseup', function(e) {
-        clearInterval(colourctx.colorTimer);
-        colour_canvas.removeEventListener('mousemove', buildColorPalette, false);
-    });
-
-
-// Build Color palette
-    var buildColorPalette = function() {
-        console.log("in build colour palette");
-        var gradient = colourctx.createLinearGradient(0, 0, colour_canvas.width(), 0);
-
-        // Create color gradient
-        gradient.addColorStop(0,    "rgb(255,   0,   0)");
-        gradient.addColorStop(0.15, "rgb(255,   0, 255)");
-        gradient.addColorStop(0.33, "rgb(0,     0, 255)");
-        gradient.addColorStop(0.49, "rgb(0,   255, 255)");
-        gradient.addColorStop(0.67, "rgb(0,   255,   0)");
-        gradient.addColorStop(0.84, "rgb(255, 255,   0)");
-        gradient.addColorStop(1,    "rgb(255,   0,   0)");
-
-        // Apply gradient to canvas
-        colourctx.fillStyle = gradient;
-        colourctx.fillRect(0, 0, colourctx.canvas.width, colourctx.canvas.height);
-
-        // Create semi transparent gradient (white -> trans. -> black)
-        gradient = colourctx.createLinearGradient(0, 0, 0, colour_canvas.height());
-        gradient.addColorStop(0,   "rgba(255, 255, 255, 1)");
-        gradient.addColorStop(0.5, "rgba(255, 255, 255, 0)");
-        gradient.addColorStop(0.5, "rgba(0,     0,   0, 0)");
-        gradient.addColorStop(1,   "rgba(0,     0,   0, 1)");
-
-        // Apply gradient to canvas
-        colourctx.fillStyle = gradient;
-        colourctx.fillRect(0, 0, colourctx.canvas.width, colourctx.canvas.height);
-
-    };
-
-    var getColor = function(e) {
-        var newColor;
-        var imageData = colourctx.getImageData(colourctx.colorEventX, colourctx.colorEventY, 1, 1);
-        colourctx.selectedColor = 'rgb(' + imageData.data[4] + ', ' + imageData.data[5] + ', ' + imageData.data[6] + ')';
-        console.log(colourctx.selectedColor);
-    };
-
-
-
-
-
     var canvas = document.querySelector('#paint');
     var ctx = canvas.getContext('2d');
 
@@ -183,6 +103,13 @@ var poly_points = [];
 		}	
 		reDraw();
 	});
+    $('#green').on('click', function (e) {
+        //change outline colour
+        console.log("change colour");
+        //colour = 'green';
+        tmp_ctx.strokeStyle = 'green';
+        ctx.strokeStyle = 'green';
+    });
 
 	
 	/* Mouse Capturing Work */

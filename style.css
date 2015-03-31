@@ -2,11 +2,15 @@ html, body {
 	width: 100%;
 	height: 100%;
 }
+body {
+    background-color: #b0c4de;
+}
 
 #sketch {
 	border: 10px solid gray;
 	height: 100%;
 	position: relative;
+    background-color: white;
 }
 
 #tmp_canvas {
