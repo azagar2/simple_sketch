@@ -24,15 +24,16 @@
 	  			<button id="circleButton" type="button" class="btn btn-primary"><img src="images/circle.jpg"></button>
                 <button id="openPolyButton" type="button" class="btn btn-primary"><img src="images/openpolygon.jpg"></button>
                 <button id="closedPolyButton" type="button" class="btn btn-primary"><img src="images/closedpolygon.jpg"></button>
-                <button id="clearButton" type="button" class="btn btn-primary"><img src="images/erase.jpg"></button>
-                <button id="deleteButton" type="button" class="btn btn-primary"><img src="images/delete.jpg"></button>
+                <button id="clearButton" type="button" class="btn btn-primary"><img src="images/delete.jpg"></button>
+                <button id="deleteButton" type="button" class="btn btn-primary"><img src="images/erase.jpg"></button>
                 <button id="copyButton" type="button" class="btn btn-primary"><img src="images/copy.jpg"></button>
                 <button id="pasteButton" type="button" class="btn btn-primary"><img src="images/paste.jpg"></button>
+                <button id="colourButton" type="button" href="#" class="btn btn-primary dropdown" data-toggle="dropdown" aria-expanded="true">Colour <span class="caret"></span></button>
 				</div>
+
 		</div>
 		<div class="col-md-12">
 <!-- 			<div class="col-md-11"> -->
-
 		
 				<div id="sketch">
 					<canvas id="paint" style="border:1px solid #000000;"></canvas>
@@ -43,9 +44,8 @@
         <div class="col-md-12">
             <!-- 			<div class="col-md-11"> -->
 
-
             <div id="colour_palette">
-                <canvas class="color-palette" id="colour" width="284" height="155"></canvas>
+                <canvas class="color-palette" id="colour" style="border:1px solid #000000;" width="284" height="155"></canvas>
                 <!--<canvas id="colour" style="border:1px solid #000000;"></canvas>-->
             </div>
 
