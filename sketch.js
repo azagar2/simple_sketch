@@ -5,7 +5,8 @@ var endOfLine = {x:0, y:0};
 var shapes = [];
 var selectedShapes = [];
 var global_x, global_y, global_radius, global_width, global_height;
-var points = [];
+var global_points = [];
+var poly_points = [];
 
 // Main stuff 
 (function() {
@@ -125,7 +126,7 @@ var points = [];
             if (!isDrawing) {
                 console.log("down new drawing");
                 isDrawing = true;
-                points.push({x: mouse.x, y:mouse.y});
+                poly_points.push({x: mouse.x, y:mouse.y});
                 endOfLine.x = mouse.x;
                 endOfLine.y = mouse.y;
                 ctx.beginPath();
@@ -133,14 +134,14 @@ var points = [];
             }
             else { // already drawing polygon
                 console.log("down already drawing");
-                points.push({x: mouse.x, y:mouse.y});
+                poly_points.push({x: mouse.x, y:mouse.y});
                 endOfLine.x = mouse.x;
                 endOfLine.y = mouse.y;
-                if (points.length > 1) {
-                    var length = points.length;
-                    ctx.lineTo(points[length-1].x, points[length-1].y);
+                if (poly_points.length > 1) {
+                    var length = poly_points.length;
+                    ctx.lineTo(poly_points[length-1].x, poly_points[length-1].y);
                     ctx.stroke();
-                    console.log("draw on canvas with points " + points[length-1].x + " and " + points[length-1].y);
+                    console.log("draw on canvas with poly_points " + poly_points[length-1].x + " and " + poly_points[length-1].y);
                 }
             }
         }
@@ -162,6 +163,10 @@ var points = [];
             if (mode == 'circle') {
                 shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius});
             }
+            else if (mode == 'line') {
+                global_points.splice(1, (global_points.length)-2);
+                shapes.push({type:'line', points: global_points});
+            }
             else if (mode == 'square') {
                 shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height });
             }
@@ -181,13 +186,12 @@ var points = [];
                 onPaint();
             }
         }
-        else{};
     }, false);
 
 
     tmp_canvas.addEventListener('dblclick', function(){
         if ((mode == 'closed') || (mode == 'open')) {
-            points.push({ x:mouse.x, y:mouse.y});
+            poly_points.push({ x:mouse.x, y:mouse.y});
             if (mode == 'closed') {
                 ctx.closePath();
             }
@@ -199,16 +203,21 @@ var points = [];
             tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
 
             // Add new polygon to shape array
+            poly_points.splice(poly_points.length-2, 2);
+            //for (var k = 0; k < poly_points.length; k++) {
+            //    console.log(poly_points[k].x);
+            //}
             if (mode == 'closed')
-                shapes.push({type:'closed', points: points});
-            else shapes.push({type:'open', points: points});
+                shapes.push({type:'closed', points: poly_points});
+            else shapes.push({type:'open', points: poly_points});
+            poly_points = [];
         }
     });
 	
 	var onPaint = function() {
 		
 		if (mode != 'select') {
-			// Saving all the points in an array
+			// Saving all the poly_points in an array
 			ppts.push({x: mouse.x, y: mouse.y});
 		}
 		
@@ -221,6 +230,9 @@ var points = [];
 			tmp_ctx.lineTo(mouse.x, mouse.y);
 			tmp_ctx.stroke();
 			tmp_ctx.closePath();
+
+            global_points.push({x:start_mouse.x, y:start_mouse.y});
+            global_points.push({x:mouse.x, y:mouse.y});
 		}
 		
 		else if (mode == 'rect') {
@@ -307,14 +319,13 @@ var points = [];
 				tmp_ctx.quadraticCurveTo(ppts[i].x, ppts[i].y, c, d);
 			}
 			
-			// For the last 2 points
+			// For the last 2 poly_points
 			tmp_ctx.quadraticCurveTo(
 				ppts[i].x,
 				ppts[i].y,
 				ppts[i + 1].x,
 				ppts[i + 1].y
 			);
-		
 			tmp_ctx.stroke();
 		}
 
@@ -338,7 +349,14 @@ var points = [];
             if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
                 ctx.strokeRect(shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h);
             }
-            else if (shapes[i].type == 'line')
+            else if (shapes[i].type == 'line') {
+                ctx.beginPath();
+                console.log(shapes[i].points[0].x + " " + shapes[i].points[0].y);
+                console.log(shapes[i].points[1].x + " " + shapes[i].points[1].y);
+                ctx.moveTo(shapes[i].points[0].x, shapes[i].points[0].y);
+                ctx.lineTo(shapes[i].points[1].x, shapes[i].points[1].y);
+                ctx.stroke();
+            }
             else if (shapes[i].type == 'circle') {
                 ctx.beginPath();
                 ctx.arc(shapes[i].x, shapes[i].y, shapes[i].rad, 0, Math.PI*2, false);
@@ -368,7 +386,17 @@ var points = [];
                 tmp_ctx.stroke();
                 tmp_ctx.closePath();
             }
-
+            else if (shapes[i].type == 'open' || shapes[i].type == 'closed') {
+                ctx.beginPath();
+                ctx.moveTo(shapes[i].points[0].x, shapes[i].points[0].y);
+                for (var j = 1; j < shapes[i].points.length; j++) {
+                    ctx.lineTo(shapes[i].points[j].x, shapes[i].points[j].y);
+                }
+                if (shapes[i].type == 'closed') {
+                    ctx.closePath();
+                }
+                ctx.stroke();
+            }
             else{};
         }
     }
