@@ -71,6 +71,8 @@ var poly_points = [];
 		shapes = [];
 		selectedShapes = [];
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		tmp_ctx.clearRect(0, 0, canvas.width, canvas.height);
+		reDraw();
 	});
 	$('#deleteButton').on('click', function (e) {
 		for (var i = 0; i<selectedShapes.length; i++) {
