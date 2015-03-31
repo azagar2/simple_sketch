@@ -38,37 +38,46 @@ var poly_points = [];
 	
 	
 	$('#selectButton').on('click', function (e) {
-    	mode = "select";
+		mode = "select";
 	});
 	$('#freehandButton').on('click', function (e) {
-    	mode = "freehand";
+		mode = "freehand";
 	});
 	$('#lineButton').on('click', function (e) {
-    	mode = "line";
+		mode = "line";
 	});
 	$('#rectButton').on('click', function (e) {
-    	mode = "rect";
+		mode = "rect";
 	});
 	$('#squareButton').on('click', function (e) {
-    	mode = "square";
+		mode = "square";
 	});
 	$('#ellipseButton').on('click', function (e) {
-    	mode = "ellipse";
+		mode = "ellipse";
 	});
 	$('#circleButton').on('click', function (e) {
-    	mode = "circle";
+		mode = "circle";
 	});
-    $('#openPolyButton').on('click', function (e) {
-        mode = "open";
-    });
-    $('#closedPolyButton').on('click', function (e) {
-        mode = "closed";
-    });
-    $('#clearButton').on('click', function (e) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        reDraw();
-        shapes = [];
-    });
+	$('#openPolyButton').on('click', function (e) {
+		mode = "open";
+	});
+	$('#closedPolyButton').on('click', function (e) {
+		mode = "closed";
+	});
+	$('#clearButton').on('click', function (e) {
+		shapes = [];
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	});
+	$('#deleteButton').on('click', function (e) {
+		for (var i = 0; i<selectedShapes.length; i++) {
+			var index = shapes.indexOf(selectedShapes[i]);
+			if (index > -1) {
+				shapes.splice(index, 1);
+			}
+		}
+		selectedShapes = [];
+		reDraw();
+	});
 
 	
 	/* Mouse Capturing Work */
@@ -85,24 +94,35 @@ var poly_points = [];
 	tmp_ctx.strokeStyle = colour;
 	tmp_ctx.fillStyle = colour;
 
-    /* Drawing on Paint App */
-    ctx.lineWidth = 5;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = colour;
-    ctx.fillStyle = colour;
+	/* Drawing on Paint App */
+	ctx.lineWidth = 5;
+	ctx.lineJoin = 'round';
+	ctx.lineCap = 'round';
+	ctx.strokeStyle = colour;
+	ctx.fillStyle = colour;
 
 	
 	tmp_canvas.addEventListener('mousedown', function(e) {
 
-		// collision detection
+		
 		if (mode == "select") {
-			for (var i = 0; i<shapes.length; i++) {
-				if (shapes[i].type == "square") {
-					if (mouse.x > shapes[i].x && mouse.x < (shapes[i].x + shapes[i].w)
-						&& mouse.y > shapes[i].y && mouse.y < (shapes[i].y + shapes[i].h)) {
-						console.log("collision");
-						selectedShapes.push(shapes[i]);
+			if (selectedShapes.length > 0) {
+				// moving shapes
+				for (var i = 0; i<selectedShapes.length; i++) {
+					selectedShapes[i].x = mouse.x;
+					selectedShapes[i].y = mouse.y;
+				}
+				reDraw();
+				selectedShapes = [];
+			} else {
+				// collision detection
+				for (var i = 0; i<shapes.length; i++) {
+					if (shapes[i].type == "square") {
+						if (mouse.x > shapes[i].x && mouse.x < (shapes[i].x + shapes[i].w)
+							&& mouse.y > shapes[i].y && mouse.y < (shapes[i].y + shapes[i].h)) {
+							console.log("collision");
+							selectedShapes.push(shapes[i]);
+						}
 					}
 				}
 			}
@@ -241,29 +261,29 @@ var poly_points = [];
 			var width = Math.abs(mouse.x - start_mouse.x);
 			var height = Math.abs(mouse.y - start_mouse.y);
 			tmp_ctx.strokeRect(x, y, width, height);
-            global_height = height;
-            global_width = width;
-            global_x = x;
-            global_y = y;
+			global_height = height;
+			global_width = width;
+			global_x = x;
+			global_y = y;
 		}
 		
 		else if (mode == 'circle') {
 			var x = (mouse.x + start_mouse.x) / 2;
-		    var y = (mouse.y + start_mouse.y) / 2;
+			var y = (mouse.y + start_mouse.y) / 2;
 		 
-		    var radius = Math.max(
-		        Math.abs(mouse.x - start_mouse.x),
-		        Math.abs(mouse.y - start_mouse.y)
-		    ) / 2;
+			var radius = Math.max(
+				Math.abs(mouse.x - start_mouse.x),
+				Math.abs(mouse.y - start_mouse.y)
+			) / 2;
 		 
-		    tmp_ctx.beginPath();
-		    tmp_ctx.arc(x, y, radius, 0, Math.PI*2, false);
-		    tmp_ctx.stroke();
-		    tmp_ctx.closePath();
+			tmp_ctx.beginPath();
+			tmp_ctx.arc(x, y, radius, 0, Math.PI*2, false);
+			tmp_ctx.stroke();
+			tmp_ctx.closePath();
 
-            global_x = x;
-            global_y = y;
-            global_radius = radius;
+			global_x = x;
+			global_y = y;
+			global_radius = radius;
 		}
 		
 		else if (mode == 'square') {
@@ -272,10 +292,10 @@ var poly_points = [];
 			var width = Math.abs(mouse.x - start_mouse.x);
 			var height = width;
 			tmp_ctx.strokeRect(x, y, width, height);
-            global_height = height;
-            global_width = width;
-            global_x = x;
-            global_y = y;
+			global_height = height;
+			global_width = width;
+			global_x = x;
+			global_y = y;
 		}
 		
 		else if (mode == 'ellipse') {
@@ -292,19 +312,19 @@ var poly_points = [];
 			xm = x + w / 2,       // x-middle
 			ym = y + h / 2;       // y-middle
 
-            tmp_ctx.beginPath();
-            tmp_ctx.moveTo(x, ym);
-            tmp_ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-            tmp_ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-            tmp_ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-            tmp_ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-            tmp_ctx.stroke();
-            tmp_ctx.closePath();
+			tmp_ctx.beginPath();
+			tmp_ctx.moveTo(x, ym);
+			tmp_ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+			tmp_ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+			tmp_ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+			tmp_ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+			tmp_ctx.stroke();
+			tmp_ctx.closePath();
 
-            global_x = x;
-            global_y = y;
-            global_width = w;
-            global_height = h;
+			global_x = x;
+			global_y = y;
+			global_width = w;
+			global_height = h;
 		}
 		
 		else if (mode == 'freehand') {
@@ -329,14 +349,14 @@ var poly_points = [];
 			tmp_ctx.stroke();
 		}
 
-        else if ((mode == 'open') || (mode == 'closed')) {
+		else if ((mode == 'open') || (mode == 'closed')) {
 
-            tmp_ctx.beginPath();
-            tmp_ctx.moveTo(endOfLine.x, endOfLine.y);
-            tmp_ctx.lineTo(mouse.x, mouse.y);
-            tmp_ctx.stroke();
-            tmp_ctx.closePath();
-        }
+			tmp_ctx.beginPath();
+			tmp_ctx.moveTo(endOfLine.x, endOfLine.y);
+			tmp_ctx.lineTo(mouse.x, mouse.y);
+			tmp_ctx.stroke();
+			tmp_ctx.closePath();
+		}
 		
 		else {}
 	};
