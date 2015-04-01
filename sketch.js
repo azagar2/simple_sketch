@@ -39,6 +39,7 @@ var numUndos = 0, offset = 10;
     /* BUTTONS */
 	$('#selectButton').on('click', function (e) {
 		mode = "select";
+        offset = 10;
 		unselect();
 		reDraw();
 	});
@@ -103,6 +104,10 @@ var numUndos = 0, offset = 10;
 				shapes.push({type:'square', x:offset, y:offset, w:copiedShapes[i].w, h:copiedShapes[i].h, colour: copiedShapes[i].colour, selected:true});
 				selectedShapes.push(shapes[shapes.length-1]);
 			}
+            start_mouse.x = offset + (copiedShapes[i].w)/2;
+            console.log("x after paste: " +start_mouse.x);
+            start_mouse.y = offset + (copiedShapes[i].h)/2;
+            console.log("y after paste: " + start_mouse.y);
 			offset += 25;
 		}	
 		reDraw();
@@ -200,6 +205,8 @@ var numUndos = 0, offset = 10;
 				// moving shapes
                 var offset = 0;
 				for (var i = 0; i<selectedShapes.length; i++) {
+                    console.log("startmouse.x: " + start_mouse.x);
+                    console.log("startmouse.y: " + start_mouse.y);
                     offset = start_mouse.x - selectedShapes[i].x;
                     selectedShapes[i].x = mouse.x - offset;
                     offset = start_mouse.y - selectedShapes[i].y;
