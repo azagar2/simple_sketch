@@ -101,8 +101,10 @@ var numUndos = 0, offset = 10;
 		for (var i = 0; i<copiedShapes.length; i++) {
 			if (copiedShapes[i].type == "square") {
 				shapes.push({type:'square', x:offset, y:offset, w:copiedShapes[i].w, h:copiedShapes[i].h, colour: copiedShapes[i].colour, selected:true});
-				selectedShapes.push(shapes[shapes.length-1]);
+			} else if (copiedShapes[i].type == "rect") {
+				shapes.push({type:'rect', x:offset, y:offset, w:copiedShapes[i].w, h:copiedShapes[i].h, colour: copiedShapes[i].colour, selected:true});
 			}
+			selectedShapes.push(shapes[shapes.length-1]);
 			offset += 25;
 		}	
 		reDraw();
@@ -209,7 +211,7 @@ var numUndos = 0, offset = 10;
 			} else {
 				// collision detection
 				for (var i = 0; i<shapes.length; i++) {
-					if (shapes[i].type == "square") {
+					if (shapes[i].type == "square" || shapes[i].type == "rect") {
 						if (mouse.x > shapes[i].x && mouse.x < (shapes[i].x + shapes[i].w)
 							&& mouse.y > shapes[i].y && mouse.y < (shapes[i].y + shapes[i].h)) {
 							console.log("collision");
@@ -293,7 +295,7 @@ var numUndos = 0, offset = 10;
                 shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour, selected:false});
             }
             else if (mode == 'rect') {
-                shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour });
+                shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour, selected:false });
             }
             else if (mode == 'ellipse') {
                 shapes.push({type:'ellipse', x:global_x, y:global_y, w:global_width, h:global_height, colour: colour});
