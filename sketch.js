@@ -10,6 +10,8 @@ var global_x, global_y, global_radius, global_width, global_height;
 var global_points = [];
 var poly_points = [];
 
+var savedSketches = [];
+
 var last_length = 0, current_length = 0;
 var numUndos = 0, numDeleted = 0;
 
@@ -81,6 +83,7 @@ var numUndos = 0, numDeleted = 0;
 			var index = shapes.indexOf(selectedShapes[i]);
 			if (index > -1) {
 				var deletedShape = shapes.splice(index, 1);
+                deletedShape.selected = false;
                 deletedShapes.push(deletedShape);
                 numDeleted++;
 			}
@@ -143,15 +146,12 @@ var numUndos = 0, numDeleted = 0;
     $(document).on('keydown', function ( e ) {
         if ( e.ctrlKey && ( String.fromCharCode(e.which) === 'z' || String.fromCharCode(e.which) === 'Z')) { //UNDO
                 if (deletedShapes.length > 0) { // something was deleted, so add it back
-                    var num = numDeleted;
-                    while (num > 0) {
                         var tempShape = deletedShapes.pop();
                         if (tempShape.colour === undefined)
                             shapes.push(tempShape[0]);
                         else
                             shapes.push(tempShape);
-                        num--;
-                    }
+                        shapes[shapes.length - 1].selected = false;
                     reDraw();
                     numUndos++;
                 }
@@ -159,20 +159,29 @@ var numUndos = 0, numDeleted = 0;
         }
         else if ( e.ctrlKey && ( String.fromCharCode(e.which) === 'y' || String.fromCharCode(e.which) === 'Y')) { //REDO
                 if (shapes.length > 0 && numUndos > 0) { // delete it again
-                    var num = numDeleted;
-                    while (num > 0) {
                         var tempShape = shapes.pop();
                         if (tempShape.colour === undefined)
                             deletedShapes.push(tempShape[0]);
                         else
                             deletedShapes.push(tempShape);
-                        num--;
-                    }
                     reDraw();
                     numUndos--;
                 }
             console.log( "You pressed CTRL + Y" );
         }
+        else if ( e.ctrlKey && ( String.fromCharCode(e.which) === 's' || String.fromCharCode(e.which) === 'S')) { //SAVE
+            // alert box - enter a name for the sketch
+            // create new file object -> {name: 'Name', data: shapes};
+            // add new object to master save array;
+            // okay button
+        }
+        else if ( e.ctrlKey && ( String.fromCharCode(e.which) === 'o' || String.fromCharCode(e.which) === 'O')) { //SAVE
+            // alert box - view all old files
+            // select a file
+            // shapes = data
+            // close box
+        }
+
         else {}
     });
 
@@ -477,7 +486,6 @@ var numUndos = 0, numDeleted = 0;
 
             if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
             	if (shapes[i].selected) {
-            		//ctx.strokeStyle = 'yellow';
                     ctx.lineWidth = 7;
             	} else {
             		ctx.strokeStyle = shapes[i].colour; // CHANGE
