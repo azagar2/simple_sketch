@@ -2,16 +2,13 @@ var mode = 'select';
 var colour = 'black';
 var isDrawing = false;
 var endOfLine = {x:0, y:0};
-var shapes = [];
-var deletedShapes = [];
-var selectedShapes = [];
-var copiedShapes = [];
+var shapes = [], deletedShapes = [], selectedShapes = [], copiedShapes = [];
 var global_x, global_y, global_radius, global_width, global_height;
-var global_points = [];
-var poly_points = [];
-
-var last_length = 0, current_length = 0;
+var global_points = [], poly_points = [];
 var numUndos = 0, numDeleted = 0;
+var isSelected = false;
+
+var max_lx = 2000, max_rx = 0, max_ty = 2000, mx_by = 0;
 
 // Main stuff 
 (function() {
@@ -34,7 +31,6 @@ var numUndos = 0, numDeleted = 0;
 	sketch.appendChild(tmp_canvas);
 
 	var mouse = {x: 0, y: 0};
-	var last_mouse = {x: 0, y: 0};
 	var start_mouse = {x:0, y:0};
 
 	// Pencil Points
@@ -139,7 +135,10 @@ var numUndos = 0, numDeleted = 0;
         ctx.strokeStyle = 'purple';
         colour = 'purple';
     });
-    
+
+
+
+
     $(document).on('keydown', function ( e ) {
         if ( e.ctrlKey && ( String.fromCharCode(e.which) === 'z' || String.fromCharCode(e.which) === 'Z')) { //UNDO
                 if (deletedShapes.length > 0) { // something was deleted, so add it back
@@ -184,14 +183,14 @@ var numUndos = 0, numDeleted = 0;
 	
 	
 	/* Drawing on Paint App */
-	tmp_ctx.lineWidth = 5;
+	tmp_ctx.lineWidth = 4;
 	tmp_ctx.lineJoin = 'round';
 	tmp_ctx.lineCap = 'round';
 	tmp_ctx.strokeStyle = colour;
 	tmp_ctx.fillStyle = colour;
 
 	/* Drawing on Paint App */
-	ctx.lineWidth = 5;
+	ctx.lineWidth = 4;
 	ctx.lineJoin = 'round';
 	ctx.lineCap = 'round';
 	ctx.strokeStyle = colour;
@@ -202,24 +201,22 @@ var numUndos = 0, numDeleted = 0;
 		
 		if (mode == "select") {
 			if (selectedShapes.length > 0) {
+                // stuff already selected
+                isSelected = true;
 				// moving shapes
 				for (var i = 0; i<selectedShapes.length; i++) {
-					selectedShapes[i].x = mouse.x;
-					selectedShapes[i].y = mouse.y;
+                    console.log("change maxs");
+                    selectedShapes[i].max_lx = mouse.x;
+                    selectedShapes[i].max_rx = mouse.x + selectedShapes[i].width;
+                    selectedShapes[i].max_ty = mouse.y;
+                    selectedShapes[i].max_by = mouse.y + selectedShapes[i].height;
+
+                    if (selectedShapes[i].type == 'square' || selectedShapes[i].type == 'rect') {
+                        selectedShapes[i].x = mouse.x;
+                        selectedShapes[i].y = mouse.y;
+                    }
 				}
 				unselect();				
-			} else {
-				// collision detection
-				for (var i = 0; i<shapes.length; i++) {
-					if (shapes[i].type == "square") {
-						if (mouse.x > shapes[i].x && mouse.x < (shapes[i].x + shapes[i].w)
-							&& mouse.y > shapes[i].y && mouse.y < (shapes[i].y + shapes[i].h)) {
-							console.log("collision");
-							shapes[i].selected = true;
-							selectedShapes.push(shapes[i]);
-						}
-					}
-				}
 			}
 		}
 
@@ -243,7 +240,6 @@ var numUndos = 0, numDeleted = 0;
         else { // open and closed polygons
             console.log("polygon");
             if (!isDrawing) {
-                console.log("down new drawing");
                 isDrawing = true;
                 poly_points.push({x: mouse.x, y:mouse.y});
                 endOfLine.x = mouse.x;
@@ -252,7 +248,6 @@ var numUndos = 0, numDeleted = 0;
                 ctx.moveTo(endOfLine.x, endOfLine.y);
             }
             else { // already drawing polygon
-                console.log("down already drawing");
                 poly_points.push({x: mouse.x, y:mouse.y});
                 endOfLine.x = mouse.x;
                 endOfLine.y = mouse.y;
@@ -273,37 +268,90 @@ var numUndos = 0, numDeleted = 0;
 
             tmp_canvas.removeEventListener('mousemove', onPaint, false);
             // Writing down to real canvas now
-            ctx.drawImage(tmp_canvas, 0, 0);
-            // Clearing tmp canvas
-            tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+            if (mode != 'select') {
+                ctx.drawImage(tmp_canvas, 0, 0);
+                // Clearing tmp canvas
+                tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+            }
+
+            if (mode == 'select') {
+                if (!isSelected) {
+                    // collision detection
+                    var left = global_x;
+                    var right = global_x + global_width;
+                    var top = global_y;
+                    var bottom = global_y + global_height;
+                    for (var i = 0; i<shapes.length; i++) {
+                        console.log("left: " + left + " far left: " + shapes[i].maxlx);
+                        console.log("right: " + right + " far right: " + shapes[i].maxrx);
+                        console.log("top: " + top + " up top: " + shapes[i].maxty);
+                        console.log("bottom: " + bottom + " down bottom: " + shapes[i].maxby);
+
+                        if ((right > shapes[i].maxrx) && (left < shapes[i].maxlx) && (bottom > shapes[i].maxby) && (top < shapes[i].maxty)) {
+
+                            console.log("collision");
+                            shapes[i].selected = true;
+                            selectedShapes.push(shapes[i]);
+                        }
+                    }
+                    isSelected = false;
+                }
+                tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+                tmp_ctx.lineWidth = 5;
+            }
 
 
             if (mode == 'freehand') {
-                shapes.push({type:'freehand', points:ppts, colour: colour});
-                // Emptying up Pencil Points
+                for (var j; j < ppts.length; j++) {
+                    if (ppts[j].x < max_lx) max_lx = ppts[j].x;
+                    if (ppts[j].x > max_rx) max_rx = ppts[j].x;
+                    if (ppts[j].y < max_ty) max_ty = ppts[j].y;
+                    if (ppts[j].y > max_by) max_by = ppts[j].y;
+                }
+                shapes.push({type:'freehand', points:ppts, colour: colour, selected:false, maxlx:max_lx, maxrx:max_rx, maxty:max_ty, maxby:max_by});
                 ppts = [];
-                console.log("clear ppts");
             }
             if (mode == 'circle') {
-                shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius, colour: colour});
+                max_lx = global_x - global_radius;
+                max_rx = global_x + global_radius;
+                max_ty = global_y - global_radius;
+                max_by = global_y + global_radius;
+                shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius, colour: colour, selected:false, maxlx:max_lx, maxrx:max_rx, maxty:max_ty, maxby:max_by});
             }
             else if (mode == 'line') {
                 global_points.splice(1, (global_points.length)-2);
-                shapes.push({type:'line', points: global_points, colour: colour});
+                for (var j; j < global_points.length; j++) {
+                    if (global_points[j].x < max_lx) max_lx = global_points[j].x;
+                    if (global_points[j].x > max_rx) max_rx = global_points[j].x;
+                    if (global_points[j].y < max_ty) max_ty = global_points[j].y;
+                    if (global_points[j].y > max_by) max_by = global_points[j].y;
+                }
+                shapes.push({type:'line', points: global_points, colour: colour, selected:false, maxlx:max_lx, maxrx:max_rx, maxty:max_ty, maxby:max_by});
             }
             else if (mode == 'square') {
-                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour, selected:false});
+                max_lx = global_x;
+                max_rx = global_x + global_width;
+                max_ty = global_y;
+                max_by = global_y + global_height;
+                //shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour, selected:false});
+                shapes.push({type:'square',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour, selected:false, maxlx:max_lx, maxrx:max_rx, maxty:max_ty, maxby:max_by });
             }
             else if (mode == 'rect') {
-                shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour });
+                max_lx = global_x;
+                max_rx = global_x + global_width;
+                max_ty = global_y;
+                max_by = global_y + global_height;
+                shapes.push({type:'rect',x:global_x, y:global_y, w:global_width, h:global_height, colour: colour, selected:false, maxlx:max_lx, maxrx:max_rx, maxty:max_ty, maxby:max_by });
             }
             else if (mode == 'ellipse') {
-                shapes.push({type:'ellipse', x:global_x, y:global_y, w:global_width, h:global_height, colour: colour});
+                max_lx = global_x - global_width;
+                max_rx = global_x + global_width;
+                max_ty = global_y - global_height;
+                max_by = global_y + global_height;
+                shapes.push({type:'ellipse', x:global_x, y:global_y, w:global_width, h:global_height, colour: colour, selected:false, maxlx:max_lx, maxrx:max_rx, maxty:max_ty, maxby:max_by});
             }
             else{};
             console.log(shapes.length);
-            last_length = current_length;
-            current_length = shapes.length;
         }
         else { // polygon
 
@@ -330,12 +378,16 @@ var numUndos = 0, numDeleted = 0;
 
             // Add new polygon to shape array
             poly_points.splice(poly_points.length-2, 2);
+            for (var j; j < poly_points.length; j++) {
+                if (poly_points[j].x < max_lx) max_lx = poly_points[j].x;
+                if (poly_points[j].x > max_rx) max_rx = poly_points[j].x;
+                if (poly_points[j].y < max_ty) max_ty = poly_points[j].y;
+                if (poly_points[j].y > max_by) max_by = poly_points[j].y;
+            }
             if (mode == 'closed')
-                shapes.push({type:'closed', points: poly_points,colour: colour});
-            else shapes.push({type:'open', points: poly_points, colour: colour});
+                shapes.push({type:'closed', points: poly_points,colour: colour, selected:false, maxlx:max_lx, maxrx:max_rx, maxty:max_ty, maxby:max_by});
+            else shapes.push({type:'open', points: poly_points, colour: colour, selected:false, maxlx:max_lx, maxrx:max_rx, maxty:max_ty, maxby:max_by});
             poly_points = [];
-            last_length = current_length;
-            current_length = shapes.length;
         }
     });
 	
@@ -361,7 +413,18 @@ var numUndos = 0, numDeleted = 0;
             global_points.push({x:start_mouse.x, y:start_mouse.y});
             global_points.push({x:mouse.x, y:mouse.y});
 		}
-		
+        else if (mode == 'select') {
+            var x = Math.min(mouse.x, start_mouse.x);
+            var y = Math.min(mouse.y, start_mouse.y);
+            var width = Math.abs(mouse.x - start_mouse.x);
+            var height = Math.abs(mouse.y - start_mouse.y);
+            tmp_ctx.lineWidth = 2;
+            tmp_ctx.strokeRect(x, y, width, height);
+            global_height = height;
+            global_width = width;
+            global_x = x;
+            global_y = y;
+        }
 		else if (mode == 'rect') {
 			var x = Math.min(mouse.x, start_mouse.x);
 			var y = Math.min(mouse.y, start_mouse.y);
@@ -473,15 +536,16 @@ var numUndos = 0, numDeleted = 0;
 
         for (var i = 0; i < shapes.length; i++) {
             ctx.strokeStyle = shapes[i].colour;
-            //console.log(shapes[i].type);
 
             if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
             	if (shapes[i].selected) {
-            		ctx.strokeStyle = 'yellow';
+            		//ctx.strokeStyle = 'yellow';
+                    ctx.lineWidth = 7;
             	} else {
             		ctx.strokeStyle = shapes[i].colour; // CHANGE
             	}
                 ctx.strokeRect(shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h);
+                ctx.lineWidth = 5;
             }
             else if (shapes[i].type == 'line') {
                 ctx.beginPath();
