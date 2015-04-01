@@ -316,7 +316,6 @@ var numUndos = 0, numDeleted = 0, offset = 10;
         }
     }, false);
 
-
     tmp_canvas.addEventListener('dblclick', function(){
         if ((mode == 'closed') || (mode == 'open')) {
             poly_points.push({ x:mouse.x, y:mouse.y});
@@ -345,7 +344,7 @@ var numUndos = 0, numDeleted = 0, offset = 10;
 			// Saving all the poly_points in an array
 			ppts.push({x: mouse.x, y: mouse.y});
 		} else {
-			reDraw();
+			//reDraw();
 		}
 		
 		// Tmp canvas is always cleared up before drawing.
@@ -473,7 +472,6 @@ var numUndos = 0, numDeleted = 0, offset = 10;
 
         for (var i = 0; i < shapes.length; i++) {
             ctx.strokeStyle = shapes[i].colour;
-            //console.log(shapes[i].type);
 
             if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
             	if (shapes[i].selected) {
@@ -513,14 +511,14 @@ var numUndos = 0, numDeleted = 0, offset = 10;
                     xm = x + w / 2,       // x-middle
                     ym = y + h / 2;       // y-middle
 
-                tmp_ctx.beginPath();
-                tmp_ctx.moveTo(x, ym);
-                tmp_ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-                tmp_ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-                tmp_ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-                tmp_ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-                tmp_ctx.stroke();
-                tmp_ctx.closePath();
+                ctx.beginPath();
+                ctx.moveTo(x, ym);
+                ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+                ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+                ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+                ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+                ctx.stroke();
+                ctx.closePath();
             }
             else if (shapes[i].type == 'open' || shapes[i].type == 'closed') {
                 ctx.beginPath();
