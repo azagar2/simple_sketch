@@ -81,7 +81,6 @@ var numUndos = 0, numDeleted = 0, offset = 10;
 				var deletedShape = shapes.splice(index, 1);
                 deletedShape.selected = false;
                 deletedShapes.push(deletedShape);
-                numDeleted++;
 			}
 		}
 		selectedShapes = [];
@@ -109,6 +108,8 @@ var numUndos = 0, numDeleted = 0, offset = 10;
 		}	
 		reDraw();
 	});
+
+    /* COLOUR PALETTE */
     $('#black').on('click', function (e) {
         tmp_ctx.strokeStyle = 'black';
         ctx.strokeStyle = 'black';
@@ -139,7 +140,9 @@ var numUndos = 0, numDeleted = 0, offset = 10;
         ctx.strokeStyle = 'purple';
         colour = 'purple';
     });
-    
+
+
+    /* UNDO AND REDO FUNCTIONALITY */
     $(document).on('keydown', function ( e ) {
         if ( e.ctrlKey && ( String.fromCharCode(e.which) === 'z' || String.fromCharCode(e.which) === 'Z')) { //UNDO
                 if (deletedShapes.length > 0) { // something was deleted, so add it back
@@ -169,28 +172,28 @@ var numUndos = 0, numDeleted = 0, offset = 10;
         else {}
     });
 
-	/* Mouse Capturing Work */
+
+    /* Styles for canvases */
+    tmp_ctx.lineWidth = 4;
+    tmp_ctx.lineJoin = 'round';
+    tmp_ctx.lineCap = 'round';
+    tmp_ctx.strokeStyle = colour;
+    tmp_ctx.fillStyle = colour;
+    ctx.lineWidth = 4;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = colour;
+    ctx.fillStyle = colour;
+
+    /* MOUSE EVENTS */
+
+    // Mouse-move
 	tmp_canvas.addEventListener('mousemove', function(e) {
 		mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
 		mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
 	}, false);
-	
-	
-	/* Drawing on Paint App */
-	tmp_ctx.lineWidth = 4;
-	tmp_ctx.lineJoin = 'round';
-	tmp_ctx.lineCap = 'round';
-	tmp_ctx.strokeStyle = colour;
-	tmp_ctx.fillStyle = colour;
 
-	/* Drawing on Paint App */
-	ctx.lineWidth = 4;
-	ctx.lineJoin = 'round';
-	ctx.lineCap = 'round';
-	ctx.strokeStyle = colour;
-	ctx.fillStyle = colour;
-
-	
+	// Mouse-down
 	tmp_canvas.addEventListener('mousedown', function(e) {
 		
 		if (mode == "select") {
@@ -480,6 +483,7 @@ var numUndos = 0, numDeleted = 0, offset = 10;
                     ctx.lineWidth = 4;
             	}
                 ctx.strokeRect(shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h);
+                ctx.lineWidth = 4;
             }
             else if (shapes[i].type == 'line') {
                 ctx.beginPath();
@@ -549,9 +553,8 @@ var numUndos = 0, numDeleted = 0, offset = 10;
                 ctx.stroke();
             }
             else{}
-
             
-        }   ctx.lineWidth = 4;
+        }
     }
 
     var unselect = function() {
