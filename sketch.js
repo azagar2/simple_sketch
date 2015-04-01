@@ -1,47 +1,43 @@
+/* Global variables */
+
 var mode = 'select';
 var colour = 'black';
 var isDrawing = false;
 var endOfLine = {x:0, y:0};
-var shapes = [];
-var deletedShapes = [];
-var selectedShapes = [];
-var copiedShapes = [];
+var shapes = [], deletedShapes = [], selectedShapes = [], copiedShapes = [];
 var global_x, global_y, global_radius, global_width, global_height;
-var global_points = [];
-var poly_points = [];
+var global_points = [], poly_points = [];
+var numUndos = 0, numDeleted = 0, offset = 10;
 
-var savedSketches = [];
 
-var last_length = 0, current_length = 0;
-var numUndos = 0, numDeleted = 0;
-
-// Main stuff 
+/* Main Function */
 (function() {
 
+    /* Initialize canvas */
     var canvas = document.querySelector('#paint');
     var ctx = canvas.getContext('2d');
-
 	var sketch = document.querySelector('#sketch');
 	var sketch_style = getComputedStyle(sketch);
 	canvas.width = parseInt(sketch_style.getPropertyValue('width'));
 	canvas.height = parseInt(sketch_style.getPropertyValue('height'));
 
-	// Creating a tmp canvas
+	// Create a temporary canvas
 	var tmp_canvas = document.createElement('canvas');
 	var tmp_ctx = tmp_canvas.getContext('2d');
 	tmp_canvas.id = 'tmp_canvas';
 	tmp_canvas.width = canvas.width;
 	tmp_canvas.height = canvas.height;
-	
-	sketch.appendChild(tmp_canvas);
 
+    // Link temporary canvas to main canvas, set mouse objects
+	sketch.appendChild(tmp_canvas);
 	var mouse = {x: 0, y: 0};
-	var last_mouse = {x: 0, y: 0};
 	var start_mouse = {x:0, y:0};
 
-	// Pencil Points
+	// Clear array for freehand points
 	var ppts = [];
-	
+
+
+    /* BUTTONS */
 	$('#selectButton').on('click', function (e) {
 		mode = "select";
 		unselect();
@@ -93,6 +89,7 @@ var numUndos = 0, numDeleted = 0;
 	});
 	$('#copyButton').on('click', function (e) {
 		if (selectedShapes.length > 0) {
+            offset = 10;
 			copiedShapes = [];
 			for (var i = 0; i<selectedShapes.length; i++) {
 				copiedShapes.push(selectedShapes[i]);
@@ -102,10 +99,10 @@ var numUndos = 0, numDeleted = 0;
 	});
 	$('#pasteButton').on('click', function (e) {
 		unselect();
-		var offset = 10;
+		//var offset = 10;
 		for (var i = 0; i<copiedShapes.length; i++) {
 			if (copiedShapes[i].type == "square") {
-				shapes.push({type:'square', x:offset, y:10, w:copiedShapes[i].w, h:copiedShapes[i].h, colour: copiedShapes[i].colour, selected:true});
+				shapes.push({type:'square', x:offset, y:offset, w:copiedShapes[i].w, h:copiedShapes[i].h, colour: copiedShapes[i].colour, selected:true});
 				selectedShapes.push(shapes[shapes.length-1]);
 			}
 			offset += 25;
@@ -169,19 +166,6 @@ var numUndos = 0, numDeleted = 0;
                 }
             console.log( "You pressed CTRL + Y" );
         }
-        else if ( e.ctrlKey && ( String.fromCharCode(e.which) === 's' || String.fromCharCode(e.which) === 'S')) { //SAVE
-            // alert box - enter a name for the sketch
-            // create new file object -> {name: 'Name', data: shapes};
-            // add new object to master save array;
-            // okay button
-        }
-        else if ( e.ctrlKey && ( String.fromCharCode(e.which) === 'o' || String.fromCharCode(e.which) === 'O')) { //SAVE
-            // alert box - view all old files
-            // select a file
-            // shapes = data
-            // close box
-        }
-
         else {}
     });
 
@@ -212,9 +196,12 @@ var numUndos = 0, numDeleted = 0;
 		if (mode == "select") {
 			if (selectedShapes.length > 0) {
 				// moving shapes
+                var offset = 0;
 				for (var i = 0; i<selectedShapes.length; i++) {
-					selectedShapes[i].x = mouse.x;
-					selectedShapes[i].y = mouse.y;
+                    offset = start_mouse.x - selectedShapes[i].x;
+                    selectedShapes[i].x = mouse.x - offset;
+                    offset = start_mouse.y - selectedShapes[i].y;
+                    selectedShapes[i].y = mouse.y - offset;
 				}
 				unselect();				
 			} else {
@@ -226,6 +213,8 @@ var numUndos = 0, numDeleted = 0;
 							console.log("collision");
 							shapes[i].selected = true;
 							selectedShapes.push(shapes[i]);
+                            start_mouse.x = mouse.x;
+                            start_mouse.y = mouse.y;
 						}
 					}
 				}
@@ -291,7 +280,6 @@ var numUndos = 0, numDeleted = 0;
                 shapes.push({type:'freehand', points:ppts, colour: colour});
                 // Emptying up Pencil Points
                 ppts = [];
-                console.log("clear ppts");
             }
             if (mode == 'circle') {
                 shapes.push({type:'circle',x:global_x, y:global_y, rad:global_radius, colour: colour});
@@ -309,10 +297,12 @@ var numUndos = 0, numDeleted = 0;
             else if (mode == 'ellipse') {
                 shapes.push({type:'ellipse', x:global_x, y:global_y, w:global_width, h:global_height, colour: colour});
             }
-            else{};
+            else if (mode == 'select') {
+                reDraw();
+            }
+            else{}
             console.log(shapes.length);
-            last_length = current_length;
-            current_length = shapes.length;
+
         }
         else { // polygon
 
@@ -343,8 +333,6 @@ var numUndos = 0, numDeleted = 0;
                 shapes.push({type:'closed', points: poly_points,colour: colour});
             else shapes.push({type:'open', points: poly_points, colour: colour});
             poly_points = [];
-            last_length = current_length;
-            current_length = shapes.length;
         }
     });
 	
