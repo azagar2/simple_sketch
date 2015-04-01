@@ -3,7 +3,7 @@ html, body {
 	height: 100%;
 }
 body {
-    background-color: #b0c4de;
+    background-color: #9ab3c6;
 }
 
 #sketch {
@@ -18,6 +18,10 @@ body {
 	left: 0px; right: 0;
 	bottom: 0; top: 0;
 	cursor: crosshair;
+}
+.btn:hover{
+    color: rgba(0, 0, 0, 0);
+    text-decoration: none;
 }
 
 .btn-black {
@@ -39,4 +43,14 @@ body {
     background: blue;
     border-color: blue;
     color: blue;
+}
+.btn-yellow {
+    background: yellow;
+    border-color: yellow;
+    color: yellow;
+}
+.btn-purple {
+    background: purple;
+    border-color: purple;
+    color: purple;
 }

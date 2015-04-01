@@ -3,11 +3,15 @@ var colour = 'black';
 var isDrawing = false;
 var endOfLine = {x:0, y:0};
 var shapes = [];
+var deletedShapes = [];
 var selectedShapes = [];
 var copiedShapes = [];
 var global_x, global_y, global_radius, global_width, global_height;
 var global_points = [];
 var poly_points = [];
+
+var last_length = 0, current_length = 0;
+var numUndos = 0, numDeleted = 0;
 
 // Main stuff 
 (function() {
@@ -19,8 +23,7 @@ var poly_points = [];
 	var sketch_style = getComputedStyle(sketch);
 	canvas.width = parseInt(sketch_style.getPropertyValue('width'));
 	canvas.height = parseInt(sketch_style.getPropertyValue('height'));
-	
-	
+
 	// Creating a tmp canvas
 	var tmp_canvas = document.createElement('canvas');
 	var tmp_ctx = tmp_canvas.getContext('2d');
@@ -36,7 +39,6 @@ var poly_points = [];
 
 	// Pencil Points
 	var ppts = [];
-	
 	
 	$('#selectButton').on('click', function (e) {
 		mode = "select";
@@ -78,7 +80,9 @@ var poly_points = [];
 		for (var i = 0; i<selectedShapes.length; i++) {
 			var index = shapes.indexOf(selectedShapes[i]);
 			if (index > -1) {
-				shapes.splice(index, 1);
+				var deletedShape = shapes.splice(index, 1);
+                deletedShapes.push(deletedShape);
+                numDeleted++;
 			}
 		}
 		selectedShapes = [];
@@ -125,7 +129,52 @@ var poly_points = [];
         ctx.strokeStyle = 'blue';
         colour = 'blue';
     });
-
+    $('#yellow').on('click', function (e) {
+        tmp_ctx.strokeStyle = 'yellow';
+        ctx.strokeStyle = 'yellow';
+        colour = 'yellow';
+    });
+    $('#purple').on('click', function (e) {
+        tmp_ctx.strokeStyle = 'purple';
+        ctx.strokeStyle = 'purple';
+        colour = 'purple';
+    });
+    
+    $(document).on('keydown', function ( e ) {
+        if ( e.ctrlKey && ( String.fromCharCode(e.which) === 'z' || String.fromCharCode(e.which) === 'Z')) { //UNDO
+                if (deletedShapes.length > 0) { // something was deleted, so add it back
+                    var num = numDeleted;
+                    while (num > 0) {
+                        var tempShape = deletedShapes.pop();
+                        if (tempShape.colour === undefined)
+                            shapes.push(tempShape[0]);
+                        else
+                            shapes.push(tempShape);
+                        num--;
+                    }
+                    reDraw();
+                    numUndos++;
+                }
+            console.log( "You pressed CTRL + Z" );
+        }
+        else if ( e.ctrlKey && ( String.fromCharCode(e.which) === 'y' || String.fromCharCode(e.which) === 'Y')) { //REDO
+                if (shapes.length > 0 && numUndos > 0) { // delete it again
+                    var num = numDeleted;
+                    while (num > 0) {
+                        var tempShape = shapes.pop();
+                        if (tempShape.colour === undefined)
+                            deletedShapes.push(tempShape[0]);
+                        else
+                            deletedShapes.push(tempShape);
+                        num--;
+                    }
+                    reDraw();
+                    numUndos--;
+                }
+            console.log( "You pressed CTRL + Y" );
+        }
+        else {}
+    });
 
 	/* Mouse Capturing Work */
 	tmp_canvas.addEventListener('mousemove', function(e) {
@@ -253,6 +302,8 @@ var poly_points = [];
             }
             else{};
             console.log(shapes.length);
+            last_length = current_length;
+            current_length = shapes.length;
         }
         else { // polygon
 
@@ -283,6 +334,8 @@ var poly_points = [];
                 shapes.push({type:'closed', points: poly_points,colour: colour});
             else shapes.push({type:'open', points: poly_points, colour: colour});
             poly_points = [];
+            last_length = current_length;
+            current_length = shapes.length;
         }
     });
 	
@@ -420,7 +473,7 @@ var poly_points = [];
 
         for (var i = 0; i < shapes.length; i++) {
             ctx.strokeStyle = shapes[i].colour;
-            console.log(shapes[i].type);
+            //console.log(shapes[i].type);
 
             if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
             	if (shapes[i].selected) {
@@ -498,6 +551,7 @@ var poly_points = [];
                 ctx.stroke();
             }
             else{};
+            
         }   
     }
 
@@ -509,8 +563,3 @@ var poly_points = [];
     }
 	
 }());
-
-
-
-
-
