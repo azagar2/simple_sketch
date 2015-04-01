@@ -184,14 +184,14 @@ var numUndos = 0, numDeleted = 0;
 	
 	
 	/* Drawing on Paint App */
-	tmp_ctx.lineWidth = 5;
+	tmp_ctx.lineWidth = 4;
 	tmp_ctx.lineJoin = 'round';
 	tmp_ctx.lineCap = 'round';
 	tmp_ctx.strokeStyle = colour;
 	tmp_ctx.fillStyle = colour;
 
 	/* Drawing on Paint App */
-	ctx.lineWidth = 5;
+	ctx.lineWidth = 4;
 	ctx.lineJoin = 'round';
 	ctx.lineCap = 'round';
 	ctx.strokeStyle = colour;
@@ -477,9 +477,11 @@ var numUndos = 0, numDeleted = 0;
 
             if ((shapes[i].type == 'square') || (shapes[i].type == 'rect')) {
             	if (shapes[i].selected) {
-            		ctx.strokeStyle = 'yellow';
+            		//ctx.strokeStyle = 'yellow';
+                    ctx.lineWidth = 7;
             	} else {
             		ctx.strokeStyle = shapes[i].colour; // CHANGE
+                    ctx.lineWidth = 4;
             	}
                 ctx.strokeRect(shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h);
             }
@@ -550,9 +552,10 @@ var numUndos = 0, numDeleted = 0;
                 }
                 ctx.stroke();
             }
-            else{};
+            else{}
+
             
-        }   
+        }   ctx.lineWidth = 4;
     }
 
     var unselect = function() {
