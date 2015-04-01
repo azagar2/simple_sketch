@@ -7,7 +7,7 @@ var endOfLine = {x:0, y:0};
 var shapes = [], deletedShapes = [], selectedShapes = [], copiedShapes = [];
 var global_x, global_y, global_radius, global_width, global_height;
 var global_points = [], poly_points = [];
-var numUndos = 0, numDeleted = 0, offset = 10;
+var numUndos = 0, offset = 10;
 
 
 /* Main Function */
@@ -35,7 +35,6 @@ var numUndos = 0, numDeleted = 0, offset = 10;
 
 	// Clear array for freehand points
 	var ppts = [];
-
 
     /* BUTTONS */
 	$('#selectButton').on('click', function (e) {
@@ -277,7 +276,6 @@ var numUndos = 0, numDeleted = 0, offset = 10;
             ctx.drawImage(tmp_canvas, 0, 0);
             // Clearing tmp canvas
             tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
-
 
             if (mode == 'freehand') {
                 shapes.push({type:'freehand', points:ppts, colour: colour});
