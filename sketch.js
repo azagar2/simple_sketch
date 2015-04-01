@@ -36,6 +36,7 @@ var numUndos = 0, offset = 10;
 	// Clear array for freehand points
 	var ppts = [];
 
+
     /* BUTTONS */
 	$('#selectButton').on('click', function (e) {
 		mode = "select";
@@ -106,9 +107,7 @@ var numUndos = 0, offset = 10;
 				shapes.push({type:'rect', x:offset, y:offset, w:copiedShapes[i].w, h:copiedShapes[i].h, colour: copiedShapes[i].colour, selected:true});
 			}
             start_mouse.x = offset + (copiedShapes[i].w)/2;
-            console.log("x after paste: " +start_mouse.x);
             start_mouse.y = offset + (copiedShapes[i].h)/2;
-            console.log("y after paste: " + start_mouse.y);
             selectedShapes.push(shapes[shapes.length-1]);
 			offset += 25;
 		}	
@@ -191,6 +190,7 @@ var numUndos = 0, offset = 10;
     ctx.strokeStyle = colour;
     ctx.fillStyle = colour;
 
+
     /* MOUSE EVENTS */
 
     // Mouse-move
@@ -207,8 +207,6 @@ var numUndos = 0, offset = 10;
 				// moving shapes
                 var offset = 0;
 				for (var i = 0; i<selectedShapes.length; i++) {
-                    console.log("startmouse.x: " + start_mouse.x);
-                    console.log("startmouse.y: " + start_mouse.y);
                     offset = start_mouse.x - selectedShapes[i].x;
                     selectedShapes[i].x = mouse.x - offset;
                     offset = start_mouse.y - selectedShapes[i].y;
@@ -231,7 +229,7 @@ var numUndos = 0, offset = 10;
 				}
 			}
 		}
-
+        // All shapes except for polygons
         if ((mode != 'open') && (mode != 'closed')) {
             tmp_canvas.addEventListener('mousemove', onPaint, false);
 
@@ -243,7 +241,6 @@ var numUndos = 0, offset = 10;
                 ppts.push({x: mouse.x, y: mouse.y});
                 console.log("ppts add first point");
             }
-
             start_mouse.x = mouse.x;
             start_mouse.y = mouse.y;
 
@@ -252,7 +249,6 @@ var numUndos = 0, offset = 10;
         else { // open and closed polygons
             console.log("polygon");
             if (!isDrawing) {
-                console.log("down new drawing");
                 isDrawing = true;
                 poly_points.push({x: mouse.x, y:mouse.y});
                 endOfLine.x = mouse.x;
@@ -261,7 +257,6 @@ var numUndos = 0, offset = 10;
                 ctx.moveTo(endOfLine.x, endOfLine.y);
             }
             else { // already drawing polygon
-                console.log("down already drawing");
                 poly_points.push({x: mouse.x, y:mouse.y});
                 endOfLine.x = mouse.x;
                 endOfLine.y = mouse.y;
@@ -275,20 +270,21 @@ var numUndos = 0, offset = 10;
         }
 	}, false);
 	
-
+    // Mouse-up
 	tmp_canvas.addEventListener('mouseup', function() {
 
         if ((mode != 'open') && (mode != 'closed')) {
 
             tmp_canvas.removeEventListener('mousemove', onPaint, false);
-            // Writing down to real canvas now
+            // Write down to main canvas
             ctx.drawImage(tmp_canvas, 0, 0);
-            // Clearing tmp canvas
+            // Clear tmp canvas
             tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
 
+            // Add the appropriate shape (that was just drawn on tmp canvas) to shapes array
             if (mode == 'freehand') {
                 shapes.push({type:'freehand', points:ppts, colour: colour});
-                // Emptying up Pencil Points
+                // Empty up freehand points
                 ppts = [];
             }
             if (mode == 'circle') {

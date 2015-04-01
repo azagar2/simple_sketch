@@ -2,9 +2,7 @@
 <html>
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<!-- <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"> -->
 		<script src="jquery-1.11.2.min.js"></script>
-		<!-- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script> -->
 		<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
 		<link rel="stylesheet" type="text/css" href="style.css">
@@ -17,8 +15,9 @@
         </div>
 
 		<div class="col-md-12">
-
             <br>
+
+            <!-- Shape buttons -->
             <div class="col-md-7">
             <div class="btn-group btn-group-lg">
             <button id="selectButton" type="button" class="btn btn-primary"><img src="images/mouse.jpg"></button>
@@ -31,12 +30,10 @@
             <button id="openPolyButton" type="button" class="btn btn-primary"><img src="images/openpolygon.jpg"></button>
             <button id="closedPolyButton" type="button" class="btn btn-primary"><img src="images/closedpolygon.jpg"></button>
             </div>
-
             </div>
 
-
+            <!-- Colour buttons -->
             <div class="col-md-2">
-
             <div class="btn-group btn-group-md">
                 <div class="btn-group btn-group-sm btn-group-vertical">
                     <button id="black" type="button" class="btn btn-black">Color</button>
@@ -51,28 +48,40 @@
                     <button id="purple" type="button" class="btn btn-purple">Color</button>
                 </div>
             </div>
-
             </div>
 
-
+            <!-- Other function buttons -->
             <div class="col-md-3">
-
             <div class="btn-group btn-group-md">
                 <button id="clearButton" type="button" class="btn btn-primary"><img src="images/delete.jpg"></button>
                 <button id="deleteButton" type="button" class="btn btn-primary"><img src="images/erase.jpg"></button>
                 <button id="copyButton" type="button" class="btn btn-primary"><img src="images/copy.jpg"></button>
                 <button id="pasteButton" type="button" class="btn btn-primary"><img src="images/paste.jpg"></button>
             </div>
-
             </div>
 
 		</div>
+
+        <!-- Canvas -->
 		<div class="col-md-12" style="height:500px">
             <br>
-				<div id="sketch" style="height:500px">
-					<canvas id="paint"></canvas>
-				</div>
+            <div id="sketch" style="height:500px">
+                <canvas id="paint"></canvas>
+            </div>
 		</div>
+
+        <!-- Program instructions -->
+        <div class="col-md-12" style="height:50px">
+            <br><br>
+            <div id="info" style="height: 50px; font: 14px georgia, sans-serif;">
+                <b>To Select: </b> Click select button and then click desired shape on the canvas. The shape's outline will become bolded. To move the selected shape, click a different point on the canvas. To deselect, click the select button again.
+                <p></p>
+                <b>Polygons: </b> To draw a polygon, click a polygon button. Clicking once on the canvas will begin a new line. Click again to draw the line and start a new one. Double click to stop drawing (closed polygon will close shape's path).
+            </div>
+
+        </div>
+
+
 
         <!-- SCRIPTS -->
 		<script src="sketch.js"></script>
